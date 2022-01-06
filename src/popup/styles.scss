@@ -1,0 +1,81 @@
+.popup-container {
+    // min-width: 500px;
+    width: 450px;
+    min-height: 700px; 
+    display: flex;
+}
+
+.popup-container .container{
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+}
+
+.topbar{
+    display: flex;
+    flex-direction: row;
+    height: 67px;
+    align-items: center;
+}
+
+.topbar .logo{
+    width: 15%;
+    display: flex;
+    align-items: center;
+}
+
+.topbar .logo img{
+    width: 100%;
+}
+
+.topbar .logo .MuiButton-root:hover{
+    background-color: transparent !important;
+}
+
+.topbar .tabs{
+    width: 100%;
+}
+
+.tabIcon{
+    width: 25px !important;
+    height: 25px !important;
+    border-radius: 0% !important;
+}
+
+.MuiTab-textColorPrimary.Mui-selected{
+    color: #9F00CF !important;
+}
+
+.tabIcon img{
+    object-fit: contain !important;
+}
+.MuiTab-root{
+    min-width: 66px !important;
+    min-height: 66px !important;
+    font-size: 0.775rem !important;
+}
+
+.MuiPaper-elevation1{
+    box-shadow: none !important;
+}
+
+.MuiAppBar-colorDefault{
+    background-color: #f5f5f5 !important;
+    margin-top: -4px !important;
+    box-shadow: 0px 2px 1px -1px #eeeeee, 0px 1px 1px 0px #eeeeee, 0px 1px 3px 0px #eeeeee;
+}
+
+.MuiTypography-h5{
+    font-family: 'Montserrat';
+}
+
+.more-icon img{
+    width: 20px;
+}
+.livechat-tab{
+    display: none !important;
+}
+.text-area p{
+    margin-bottom: 0px !important;
+}

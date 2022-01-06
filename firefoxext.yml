@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  ext:
+    container_name: "firefoxext_main"
+    build: ../firefoxext
+    image: firefoxext
+    environment:
+      REACT_APP_PUBLIC_API: http://localhost:5002/api
+      NODE_ENV: "development"
+      VERSION: 0.0
+      REACT_APP_MOD_URL: http://localhost:3001
+      REACT_APP_IMG_URL: http://localhost:5002/imgproxy
+      REACT_APP_CAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001"
+    volumes:
+      - "/firefoxext/node_modules"
+      - "../firefoxext:/firefoxext"
+    command: >
+      sh -c "cd /firefoxext &&
+      yarn install &&
+      npm run dev"
+
+networks:
+  default:
+    name: netvyne

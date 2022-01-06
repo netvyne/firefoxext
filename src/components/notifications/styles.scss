@@ -1,0 +1,19 @@
+.comment{
+    overflow-wrap: anywhere;
+}
+.vote-buttons{
+    min-width: 35px !important;
+}
+.reply-actions-box{
+    display: flex;
+    flex-direction: column;
+}
+.reply-actions{
+    display: flex;
+    flex-direction: row;
+}
+.notificationBox{
+    cursor: pointer;
+    background-color: rgb(236, 239, 241);
+    border-radius: 5px
+}

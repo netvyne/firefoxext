@@ -1,0 +1,52 @@
+{
+  "manifest_version": 2,
+  "name": "Netvyne Extension",
+  "description": "Comment, share, and discuss your favorite websites.",
+  "version": "2.0.0",
+  "content_scripts": [
+    {
+      "run_at": "document_end",
+      "matches": [
+        "https://*/*",
+        "http://*/*"
+      ],
+      "js": [
+        "content-script.js"
+      ],
+      "css": [
+        "crop-style.css"
+      ]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ali@livesports.ai"
+    }
+  },
+  "web_accessible_resources": [
+    "popup.html"
+  ],
+  "browser_action": {},
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "permissions": [
+    "cookies",
+    "storage",
+    "activeTab",
+    "tabs",
+    "<all_urls>"
+  ]
+}
