@@ -2,10 +2,11 @@
 import HomeIcon from '@mui/icons-material/Home';
 import PublicIcon from '@mui/icons-material/Public';
 import {
-  AppBar, Avatar, Badge, Box, Grid, Tab, Tabs, Typography
+  AppBar, Avatar, Badge, Box, Grid, PaletteMode, Tab, Tabs, Typography
 } from '@mui/material/';
-import { styled } from '@mui/material/styles';
+import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
 import Public from '@src/components/public/Public';
+import { sha256 } from 'js-sha256';
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import { QueryClientProvider, useQuery } from 'react-query';
 import { browser } from 'webextension-polyfill-ts';
@@ -13,8 +14,10 @@ import { User } from '../../types/common/types';
 import Notifications from '../components/notifications/Notifications';
 import Sharing from '../components/sharing/Sharing';
 import { queryClient } from '../query';
+import urlDomainMap from '../url_domain_map.json';
+import urlQueryParamFilter from '../url_query_param_filter.json';
 import {
-  formatImageURL, isValidURL, setBadge
+  cleanUrl, formatImageURL, getThemeColors, isValidURL, setBadge
 } from '../utils';
 import './styles.scss';
 
@@ -63,9 +66,10 @@ export const Popup: FunctionComponent = () => {
   const [user, setUser] = React.useState<User|any>();
   const [url, setUrl] = useState<any>({});
   // eslint-disable-next-line no-unused-vars
-  const [isTabActive, setIsTabActive] = useState<any>(true);
-  const [intervalCount, setIntervalCount] = useState(0);
-  // intervalCount
+  const [isTabActive, setIsTabActive] = useState<any>(false);
+  const [isTabUpdated, setIsTabUpdated] = useState(false);
+  const [mode, setMode] = useState<PaletteMode>('light');
+  const [themeColors, setThemeColors] = React.useState<any>('');
   const intervalMs = 5000;
 
   // Sends the `popupMounted` event
@@ -76,7 +80,79 @@ export const Popup: FunctionComponent = () => {
     browser.runtime.sendMessage({ popupMounted: true });
   }, []);
 
-  const route = `/get_user_notifications?host=${url.host}&pathname=${url.pathname}&search=${encodeURIComponent(url.search)}`;
+
+  const getDesignTokens = (extMode: PaletteMode) => ({
+    palette: {
+      mode: extMode
+    },
+  });
+
+  const theme = React.useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
+
+  // Sends the `popupMounted` event
+  React.useEffect(() => {
+    setThemeColors(getThemeColors(mode));
+  }, [mode]);
+
+  React.useEffect(() => {
+    const preferredMode = localStorage.getItem('mode');
+    if (preferredMode === 'light' || preferredMode === 'dark') {
+      setMode(preferredMode);
+    } else {
+      setMode('light');
+    }
+    chrome.runtime.onMessage.addListener((msg) => {
+      if (msg === 'toggle') {
+        chrome.storage.sync.get(['isExtClosed'], (result) => {
+          if (result.isExtClosed === true) {
+            chrome.storage.sync.get(
+              {
+                netvyneBadge: true,
+              },
+              (items) => {
+                if (items.netvyneBadge === true || items.netvyneBadge === null) {
+                  setIsTabUpdated(true);
+                  setAutoFetch(true);
+                } else {
+                  setIsTabUpdated(false);
+                  setAutoFetch(false);
+                }
+              }
+            );
+          } else {
+            setIsTabUpdated(true);
+            setAutoFetch(true);
+            setIsTabActive(true);
+          }
+        });
+      }
+    });
+    browser.runtime.sendMessage({ popupMounted: true });
+
+    chrome.storage.sync.get(['isExtClosed'], (result) => {
+      if (result.isExtClosed === true) {
+        chrome.storage.sync.get(
+          {
+            netvyneBadge: true,
+          },
+          (items) => {
+            if (items.netvyneBadge === true || items.netvyneBadge === null) {
+              setAutoFetch(true);
+            } else {
+              setAutoFetch(false);
+            }
+          }
+        );
+      } else {
+        setAutoFetch(true);
+        setIsTabActive(true);
+      }
+    });
+  }, []);
+
+  const urlHash = sha256(`${url.host}${url.pathname}${url.search}`);
+
+  const route = `/get_user_notifications?url_hash=${urlHash}`;
 
   const { data, refetch } = useQuery<any, string>(route, { enabled: (isTabActive && autoFetch && !!user), refetchInterval: intervalMs });
 
@@ -98,18 +174,64 @@ export const Popup: FunctionComponent = () => {
         setIsTabActive(tab?.active);
       });
     }
-  }, [intervalCount]);
+  }, []);
+
+  const queryInfo = { active: true, lastFocusedWindow: true };
+
   useEffect(() => {
-    const queryInfo = { active: true, lastFocusedWindow: true };
+    chrome.runtime.onMessage.addListener(
+      (request) => {
+        // listen for messages sent from background.js
+        if (request.message === 'urlupdated') {
+          setIsTabUpdated(true);
+          setTimeout(() => {
+            const newUrl : any = isValidURL(request.completeInfo.url);
+            let formatedUrl = {
+              pathname: newUrl.pathname,
+              host: newUrl.host,
+              search: newUrl.search,
+              Title: request.completeInfo.title,
+              origin: newUrl.origin,
+            };
+            formatedUrl = cleanUrl(formatedUrl, urlDomainMap, urlQueryParamFilter);
+            setUrl(formatedUrl);
+            if (autoFetch) {
+              refetch();
+            }
+          }, 2000);
+        }
+
+        if(request.message === 'currentTabInfo'){
+          const newUrl : any = isValidURL(request.urlInfo.url);
+          const formatedUrl = {
+            pathname: newUrl.pathname,
+            host: newUrl.host,
+            search: newUrl.search,
+            Title: request.urlInfo.title,
+            origin: newUrl.origin,
+          };
+          setUrl(formatedUrl);
+          if (autoFetch) {
+            refetch();
+          }
+          // console.log(' urlInfo :::: ', request.urlInfo);
+        }
+      }
+    );
+  }, []);
+
+  useEffect(() => {
     if (chrome.tabs) {
       chrome.tabs.query(queryInfo, (tabs) => {
         const newUrl : any = isValidURL(tabs[0].url);
-        const formatedUrl = {
+        // setIsTabActive(true);
+        let formatedUrl = {
           pathname: newUrl.pathname,
           host: newUrl.host,
           search: newUrl.search,
           Title: tabs[0].title,
         };
+        formatedUrl = cleanUrl(formatedUrl, urlDomainMap, urlQueryParamFilter);
         setUrl(formatedUrl);
       });
     }
@@ -120,27 +242,7 @@ export const Popup: FunctionComponent = () => {
         setBadge('');
       }
     }
-    setTimeout(() => {
-      const newCount = intervalCount + 1;
-      setIntervalCount(newCount);
-      setAutoFetch(false);
-      chrome.storage.sync.get(
-        {
-          netvyneBadge: true,
-        },
-        (items) => {
-          if (items.netvyneBadge === true || items.netvyneBadge === null) {
-            setAutoFetch(true);
-          }
-        }
-      );
-      chrome.storage.sync.get(['isExtClosed'], (result) => {
-        if (result.isExtClosed === false) {
-          setAutoFetch(true);
-        }
-      });
-    }, 5000);
-  }, [data, intervalCount]);
+  }, [data]);
 
   const [value, setValue] = React.useState(0);
   const handleChange = (event : any, newValue : any) => {
@@ -150,77 +252,79 @@ export const Popup: FunctionComponent = () => {
   // Renders the component tree
   return (
     <QueryClientProvider client={queryClient}>
-      <Root className={classes.root}>
-        <div className="popup-container">
-          <div className="container mx-1 my-1">
-            <AppBar position="fixed" sx={{ top: '0px' }} color="default" elevation={1}>
-              <Grid className="topbar">
-                <Tabs
-                  className="tabs"
-                  value={value}
-                  onChange={handleChange}
-                  indicatorColor="primary"
-                  textColor="primary"
-                  variant="fullWidth"
-                  aria-label="icon label tabs example"
-                  TabIndicatorProps={{
-                    style: {
-                      backgroundColor: '#9F00CF',
-                    },
-                  }}
-                >
-                  <Tab icon={<PublicIcon sx={{ color: value === 0 ? '#9F00CF' : 'black' }} />} label="Public" {...a11yProps(0)} />
-                  <Tab icon={<HomeIcon sx={{ color: value === 1 ? '#9F00CF' : 'black' }} />} label="Private" {...a11yProps(1)} />
-                  <Tab
-                    icon={(
-                      <Badge
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'right',
-                        }}
-                        color="primary"
-                        variant="dot"
-                        invisible={!data?.ContainsUnread}
-                      >
-                        {user?.AvatarPath ? (
-                          <Avatar
-                            style={{ width: 24, height: 24 }}
-                            alt="Avatar"
-                            src={formatImageURL(user.AvatarPath)}
-                          />
-                        )
-                          : (
+      <ThemeProvider theme={theme}>
+        <Root className={classes.root}>
+          <div className={`popup-container mode-${mode}`} style={{ height: `${window.innerHeight}px` }}>
+            <div className="container mx-1 my-1">
+              <AppBar position="fixed" sx={{ top: '0px', backgroundColor: themeColors.divBackground }} elevation={1}>
+                <Grid className="topbar">
+                  <Tabs
+                    className="tabs"
+                    value={value}
+                    onChange={handleChange}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    variant="fullWidth"
+                    aria-label="icon label tabs example"
+                    TabIndicatorProps={{
+                      style: {
+                        backgroundColor: '#9F00CF',
+                      },
+                    }}
+                  >
+                    <Tab icon={<PublicIcon sx={{ color: value === 0 ? '#9F00CF' : 'default' }} />} label="Public" {...a11yProps(0)} />
+                    <Tab icon={<HomeIcon sx={{ color: value === 1 ? '#9F00CF' : 'default' }} />} label="Private" {...a11yProps(1)} />
+                    <Tab
+                      icon={(
+                        <Badge
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                          }}
+                          color="primary"
+                          variant="dot"
+                          invisible={!data?.ContainsUnread}
+                        >
+                          {user?.AvatarPath ? (
                             <Avatar
-                              alt="Handle initial"
-                              style={{
-                                width: 24, height: 24, fontSize: '1.5rem', backgroundColor: 'black'
-                              }}
-                            >
-                              {`${user?.UserName?.charAt(0).toUpperCase()}`}
-                            </Avatar>
-                          )}
-                      </Badge>
-)}
-                    label="Profile"
-                    {...a11yProps(2)}
-                  />
-                </Tabs>
-              </Grid>
-            </AppBar>
-            <Box sx={{ marginTop: '60px', padding: '8px', paddingTop: '0px' }}>
-              <TabPanel value={value} index={0}>
-                <Public initCurrentUser={user} autoFetch={autoFetch} isTabActive={isTabActive} />
-              </TabPanel>
-              <TabPanel style={{ paddingTop: '8px' }} value={value} index={1}>
-                <Sharing defUser={user} />
-              </TabPanel>
-              <TabPanel style={{ paddingTop: '8px' }} value={value} index={2}>
-                <Notifications refetch={refetch} />
-              </TabPanel>
-            </Box>
+                              style={{ width: 24, height: 24 }}
+                              alt="Avatar"
+                              src={formatImageURL(user.AvatarPath)}
+                            />
+                          )
+                            : (
+                              <Avatar
+                                alt="Handle initial"
+                                style={{
+                                  width: 24, height: 24, fontSize: '1.5rem', backgroundColor: 'black'
+                                }}
+                              >
+                                {`${user?.UserName?.charAt(0).toUpperCase()}`}
+                              </Avatar>
+                            )}
+                        </Badge>
+  )}
+                      label="Profile"
+                      {...a11yProps(2)}
+                    />
+                  </Tabs>
+                </Grid>
+              </AppBar>
+              <Box sx={{ marginTop: '60px', padding: '8px', paddingTop: '0px' }}>
+                <TabPanel value={value} index={0}>
+                  <Public initCurrentUser={user} isTabActive={isTabActive} url={url} isTabUpdated={isTabUpdated} themeColors={themeColors} />
+                </TabPanel>
+                <TabPanel style={{ paddingTop: '8px' }} value={value} index={1}>
+                  <Sharing defUser={user} url={url} themeColors={themeColors} />
+                </TabPanel>
+                <TabPanel style={{ paddingTop: '8px' }} value={value} index={2}>
+                  <Notifications refetch={refetch} mode={mode} setMode={setMode} themeColors={themeColors} />
+                </TabPanel>
+              </Box>
+            </div>
           </div>
-        </div>
-      </Root>
+        </Root>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 };

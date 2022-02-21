@@ -13,13 +13,13 @@ import {
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import MDEditor from '@uiw/react-md-editor';
-import React, { useEffect, useState } from 'react';
+import { sha256 } from 'js-sha256';
+import React, { useEffect } from 'react';
 import {
   useMutation, useQuery
 } from 'react-query';
 import { Post, User } from '../../../types/common/types';
-// import { getCurrentUser } from '../../auth/auth';
-import { createDiv, isValidURL, screenShot } from '../../utils';
+import { createDiv, screenShot } from '../../utils';
 import PostShare from '../talk/PostShare';
 import Dropdown from './dropdown';
 import './styles.scss';
@@ -61,34 +61,23 @@ const sharingTheme = createTheme({
           },
         },
       },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          color: '#3f51b5',
-        },
-        outlinedPrimary: {
-          color: '#3f51b5',
-          border: 'solid 1px #3f51b5',
-        }
-      },
     }
   }
 });
 
 interface Props {
-  defUser: User
+  defUser: User;
+  url: any;
+  themeColors: any;
 }
-const Sharing = ({ defUser } : Props) => {
+const Sharing = ({ defUser, url, themeColors } : Props) => {
   const [shareSeparately, setShareSeparately] = React.useState(false);
   const [markSensitive, setMarkSensitive] = React.useState(false);
-  const [url, setUrl] = useState<any>({});
   const [comment, setComment] = React.useState('Check this out!');
   const [conversationID, setConversationID] = React.useState(0);
   const [open, setOpen] = React.useState(false);
 
   const [dataURL, setDataURL] = React.useState('');
-  // const [user, setUser] = React.useState<User | any>();
 
   const [friendHandles, setFriendHandles] = React.useState([]);
   const [createConv, setCreateConv] = React.useState(false);
@@ -114,8 +103,6 @@ const Sharing = ({ defUser } : Props) => {
     setCreateConv(false);
   };
 
-  // getCurrentUser().then((currentUser: User | null) => setUser(currentUser));
-
   function cropcallback() {
     chrome.storage.local.get({ screenshot: null }, (data) => {
       setDataURL(data.screenshot);
@@ -132,8 +119,9 @@ const Sharing = ({ defUser } : Props) => {
     }
   };
 
+  const urlHash = sha256(`${url.host}${url.pathname}${url.search}`);
   const { refetch, status } = useQuery<GetWebsitePostsQuery, string>(
-    `/get_website_posts?host=${url.host}&pathname=${url.pathname}&search=${encodeURIComponent(url.search)}`, {
+    `/get_website_posts?url_hash=${urlHash}`, {
       onSuccess: (postData) => {
         setFriendsPosts(postData.FriendsPosts);
         setConversationsPosts(postData.ConversationsPosts);
@@ -142,22 +130,8 @@ const Sharing = ({ defUser } : Props) => {
   );
 
   useEffect(() => {
-    const queryInfo = { active: true, lastFocusedWindow: true };
-    if (chrome.tabs) {
-      chrome.tabs.query(queryInfo, (tabs) => {
-        const newUrl : any = isValidURL(tabs[0].url);
-        const formatedUrl = {
-          pathname: newUrl.pathname,
-          host: newUrl.host,
-          search: newUrl.search,
-          Title: tabs[0].title,
-        };
-        setUrl(formatedUrl);
-      });
-    }
     chrome.runtime.onMessage.addListener(handleMessage);
   }, []);
-  // // // // // //
 
   const handleClose = (event?: React.SyntheticEvent, reason?: string) => {
     if (reason === 'clickaway') {
@@ -223,6 +197,7 @@ const Sharing = ({ defUser } : Props) => {
       CreateConv: createConv,
       ConversationID: conversationID,
       MarkSensitive: markSensitive,
+      PostType: 'website',
     };
     const res = shareMutation.mutate(
       // @ts-ignore
@@ -298,7 +273,7 @@ const Sharing = ({ defUser } : Props) => {
       item
       xs={12}
       style={{
-        padding: '10px', backgroundColor: '#eceff1', marginBottom: '10px', cursor: 'pointer'
+        padding: '10px', backgroundColor: themeColors.divBackground, marginBottom: '10px', cursor: 'pointer', color: themeColors.commentText
       }}
     >
       Nothing yet. Be the first to share!
@@ -316,7 +291,7 @@ const Sharing = ({ defUser } : Props) => {
         item
         xs={12}
         style={{
-          padding: '10px', backgroundColor: '#eceff1', marginBottom: '10px', cursor: 'pointer'
+          padding: '10px', backgroundColor: themeColors.divBackground, marginBottom: '10px', cursor: 'pointer', color: themeColors.commentText
         }}
         onClick={() => { setShowTalkTree(true); setPost(friend); }}
       >
@@ -329,7 +304,7 @@ const Sharing = ({ defUser } : Props) => {
         item
         xs={12}
         style={{
-          padding: '10px', backgroundColor: '#eceff1', marginBottom: '10px', cursor: 'pointer'
+          padding: '10px', backgroundColor: themeColors.divBackground, marginBottom: '10px', cursor: 'pointer', color: themeColors.commentText
         }}
         onClick={() => { setShowTalkTree(true); setPost(conversation); }}
       >
@@ -367,14 +342,14 @@ const Sharing = ({ defUser } : Props) => {
             {dropdown && (
             <Grid item container xs={12} direction="row" spacing={1} alignItems="center" wrap="nowrap">
               <Grid item xs={10}>
-                <Dropdown dropdownRefetch={dropdownRefetch} setConversationID={setConversationID} mode="conv" />
+                <Dropdown dropdownRefetch={dropdownRefetch} setConversationID={setConversationID} mode="conv" themeColors={themeColors} />
               </Grid>
               <Grid item xs={1}>
                 <IconButton
                   sx={{
-                    color: 'black',
+                    color: themeColors.iconsButtonsColor,
                     '&:hover': {
-                      color: '#757ce8',
+                      color: themeColors.iconsButtonsColorHover,
                     },
                   }}
                   onClick={toggleDropdown}
@@ -385,10 +360,10 @@ const Sharing = ({ defUser } : Props) => {
               <Grid item xs={1}>
                 <IconButton
                   sx={{
-                    color: moreOptions ? '#757ce8' : 'black',
+                    color: themeColors.iconsButtonsColor,
                     '&:hover': {
-                      color: '#757ce8',
-                    }
+                      color: themeColors.iconsButtonsColorHover,
+                    },
                   }}
                   onClick={toggleMoreOptions}
                 >
@@ -400,14 +375,14 @@ const Sharing = ({ defUser } : Props) => {
             {!dropdown && (
             <Grid item container xs={12} direction="row" spacing={1} alignItems="center" wrap="nowrap">
               <Grid item xs={10}>
-                <Dropdown dropdownRefetch={dropdownRefetch} setFriendHandles={setFriendHandles} mode="friends" />
+                <Dropdown dropdownRefetch={dropdownRefetch} setFriendHandles={setFriendHandles} mode="friends" themeColors={themeColors} />
               </Grid>
               <Grid item xs={1}>
                 <IconButton
                   sx={{
-                    color: 'black',
+                    color: themeColors.iconsButtonsColor,
                     '&:hover': {
-                      color: '#757ce8',
+                      color: themeColors.iconsButtonsColorHover,
                     },
                   }}
                   onClick={toggleDropdown}
@@ -418,10 +393,10 @@ const Sharing = ({ defUser } : Props) => {
               <Grid item xs={1}>
                 <IconButton
                   sx={{
-                    color: moreOptions ? '#757ce8' : 'black',
+                    color: themeColors.iconsButtonsColor,
                     '&:hover': {
-                      color: '#757ce8',
-                    }
+                      color: themeColors.iconsButtonsColorHover,
+                    },
                   }}
                   onClick={toggleMoreOptions}
                 >
@@ -431,11 +406,11 @@ const Sharing = ({ defUser } : Props) => {
             </Grid>
             )}
             {bbox}
-            <Box>
+            <Box my={1}>
               <Button
                 type="button"
                 onClick={createTestDiv}
-                sx={{ paddingLeft: '0PX' }}
+                sx={{ paddingLeft: '0PX', display: 'none' }}
               >
                 Include Screenshot
               </Button>
@@ -564,6 +539,7 @@ const Sharing = ({ defUser } : Props) => {
                   placeholder: 'Lookit!',
                 }}
                 height={100}
+                style={{ backgroundColor: themeColors.divBackground }}
                 value={comment}
                 preview="edit"
                 onChange={(value: string | undefined) => value !== undefined && setComment(value)}
@@ -592,32 +568,35 @@ const Sharing = ({ defUser } : Props) => {
             </Box>
           </form>
           <Grid item container xs={12} direction="column" spacing={1} wrap="nowrap">
-            {/* {conversationShares.length > 0 && ( */}
             <Grid item xs={12}>
               <Typography variant="h6">
                 Shared with conversations
               </Typography>
               { (conversationShares.length > 0) ? conversationShares : nothingPlaceHolder }
             </Grid>
-            {/* )} */}
-            {/* {friendShares.length > 0 && ( */}
             <Grid item xs={12}>
               <Typography variant="h6">
                 Shared with friends
               </Typography>
               { (friendShares.length > 0) ? friendShares : nothingPlaceHolder }
-              {/* {friendShares} */}
             </Grid>
-            {/* )} */}
           </Grid>
         </Box>
         )}
         {showTalkTree && (
         <Box>
-          <IconButton onClick={() => { setShowTalkTree(false); refetch(); }}>
+          <IconButton
+            onClick={() => { setShowTalkTree(false); refetch(); }}
+            sx={{
+              color: themeColors.iconsButtonsColor,
+              '&:hover': {
+                color: themeColors.iconsButtonsColorHover,
+              },
+            }}
+          >
             <KeyboardBackspace />
           </IconButton>
-          <PostShare post={post} key={post.ID} defUser={defUser} setShowTalkTree={setShowTalkTree} refetch={refetch} />
+          <PostShare post={post} key={post.ID} defUser={defUser} setShowTalkTree={setShowTalkTree} postRefetch={refetch} themeColors={themeColors} />
         </Box>
         )}
       </Box>

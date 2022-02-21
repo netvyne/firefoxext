@@ -9,19 +9,16 @@ import {
 import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
 import { Picker } from 'emoji-mart';
 import 'emoji-mart/css/emoji-mart.css';
+import { sha256 } from 'js-sha256';
 import React, {
   useEffect, useRef, useState
 } from 'react';
 import { useMutation } from 'react-query';
 import { ChatMessage } from '../../../types/common/types';
-// import { ChatMessage, User } from '../../../types/common/types';
-// import { getCurrentUser } from '../../auth/auth';
-import { isValidURL } from '../../utils';
+// import urlDomainMap from '../../url_domain_map.json';
+// import urlQueryParamFilter from '../../url_query_param_filter.json';
+// import { cleanUrl, isValidURL } from '../../utils';
 import './styles.scss';
-
-// interface GetUserQuery {
-//   initCurrentUser: User[];
-// }
 
 const chatFormTheme = createTheme({
   components: {
@@ -97,39 +94,39 @@ const Root = styled('div')(() => ({
   },
 }));
 
-const Chat = () => {
+interface Props {
+  initURL: any;
+  themeColors: any;
+}
+
+const Chat = ({ initURL, themeColors } : Props) => {
   const [comment, setComment] = React.useState('');
   const [parentChat, setParentChat] = useState<ChatMessage | null>();
   const webSocket = useRef<WebSocket | null>(null);
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
-  const [url, setUrl] = useState<any>({});
-  // const [user, setUser] = React.useState<User|any>();
-  // const [showAction, setShowAction] = React.useState(false);
+  // const [url, setUrl] = useState<any>({});
   const [show, setShow] = React.useState(false);
-  // const [websiteId, setWebsiteId] = React.useState<any>(null);
-  // const divRef : any = useRef(null);
   const messagesEndRef: any = useRef(null);
-  // getCurrentUser().then((currentUser:User|any) => setUser(initCurrentUser));
 
   const scrollToBottom = () => {
     messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
   };
 
-  function createSocket(currentUrl : any) {
+  function createSocket() {
     const publicApiUrl : any = process.env.REACT_APP_PUBLIC_API;
     const socketUrl = publicApiUrl.replace('http', 'ws');
-    const socket = new WebSocket(`${socketUrl}/get_chat_socket?host=${currentUrl.host}&pathname=${currentUrl.pathname}&search=${encodeURIComponent(currentUrl.search)}`);
-    // console.log('Socket created', socket);
+    const urlHash = sha256(`${initURL.host}${initURL.pathname}${initURL.search}`);
+    const socket = new WebSocket(`${socketUrl}/get_chat_socket?url_hash=${urlHash}`);
+    console.log('Socket created', socket);
     if (!socket) {
-      const intervalID = setInterval(alert, 30000);
-      clearInterval(intervalID);
-      setInterval(() => {
-        createSocket(currentUrl);
+      // const intervalID = setInterval(alert, 30000);
+      // clearInterval(intervalID);
+      setTimeout(() => {
+        createSocket();
       }, 30000);
     }
     webSocket.current = socket;
     webSocket.current.onmessage = (message : any) => {
-      // console.log('messages :::::', message);
       const response : any = JSON.parse(message.data);
       messages.push(response);
       setMessages(messages);
@@ -139,20 +136,7 @@ const Chat = () => {
 
   let parentChatTitle : any = '';
   useEffect(() => {
-    const queryInfo = { active: true };
-    if (chrome.tabs) {
-      chrome.tabs.query(queryInfo, (t) => {
-        const newUrl : any = isValidURL(t[0].url);
-        const formatedUrl = {
-          pathname: newUrl.pathname,
-          host: newUrl.host,
-          search: newUrl.search,
-          Title: t[0].title,
-        };
-        setUrl(formatedUrl);
-        createSocket(formatedUrl);
-      });
-    }
+    createSocket();
   }, []);
 
   useEffect(scrollToBottom, [messages]);
@@ -160,17 +144,13 @@ const Chat = () => {
   const mutation = useMutation({});
   const postChat = async (event : any) => {
     event.preventDefault();
-    // if (messages.length === 0) {
-    //   webSocket.current?.close();
-    //   createSocket(url);
-    // }
     const data = {
       ParentChatID: parentChat?.ID,
       Comment: comment,
       URL: {
-        Host: url.host,
-        Pathname: url.pathname,
-        Search: url.search,
+        Host: initURL.host,
+        Pathname: initURL.pathname,
+        Search: initURL.search,
       },
     };
       // @ts-ignore
@@ -204,8 +184,6 @@ const Chat = () => {
       <Grid
         container
         spacing={2}
-        // onMouseOver={() => setShowAction(true)}
-        // onMouseLeave={() => setShowAction(false)}
       >
         <div className="mydivouter">
           <div className="chatTextMessage">
@@ -224,15 +202,9 @@ const Chat = () => {
               setParentChat(message);
             }}
           >
-            <ReplyIcon />
+            <ReplyIcon style={{ color: themeColors.toggleButton }}/>
 
           </button>
-          {/* <ReplyIcon
-            className="mybuttonoverlap btn btn-info"
-            onClick={() => {
-              setParentChat(message);
-            }}
-          /> */}
         </div>
 
       </Grid>

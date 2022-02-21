@@ -1,18 +1,38 @@
-import { Box, Button } from '@mui/material';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import NightlightOutlinedIcon from '@mui/icons-material/NightlightOutlined';
+import {
+  Box, Button, Typography
+} from '@mui/material';
 import React from 'react';
 import { useMutation, useQuery } from 'react-query';
 import NotificationBox from './NotificationBox';
+import Login from './Login';
 
 interface Props {
   refetch: any;
+  mode: string;
+  setMode: any;
+  themeColors: any;
 }
 interface GetUserNotifsQuery {
   Notifications: Notification[];
   ContainsUnread: boolean;
 }
-const Notifications = ({ refetch } : Props) => {
-// export const Notifications : FunctionComponent = ({ refetch }: Props) => {
+const Notifications = ({
+  refetch, mode, setMode, themeColors
+} : Props) => {
   const [allNotifications, setAllNotifications] = React.useState<any>([]);
+  const [currentUser, setCurrentUser] = React.useState<any>([]);
+
+  React.useEffect(() => {
+    let loggedinUser: any = localStorage.getItem('netvyneUser');
+    if(loggedinUser !== ""){
+      loggedinUser = JSON.parse(loggedinUser);
+    }
+    if (loggedinUser && loggedinUser.CurrentUser) {
+      setCurrentUser(loggedinUser);
+    }
+  }, []);
 
   const notificationsQuery = useQuery<GetUserNotifsQuery, string>(
     '/get_user_notifications', { onSuccess: (data) => setAllNotifications(data.Notifications) }
@@ -34,13 +54,17 @@ const Notifications = ({ refetch } : Props) => {
       },
       {
         onSuccess: (response : any) => {
-          console.log(response);
           refetch();
         },
       },
     );
     return res;
   };
+
+  function logout(){
+    localStorage.removeItem('netvyneUser');
+    setCurrentUser([]);
+  }
 
   let notifications: any = '';
   if (notificationsQuery.status === 'error') {
@@ -49,9 +73,15 @@ const Notifications = ({ refetch } : Props) => {
     notifications = <div>Loading</div>;
   } else {
     notifications = allNotifications.map((notification : any) => (
-      <NotificationBox notification={notification} refetch={refetch} />
+      <NotificationBox notification={notification} refetch={refetch} themeColors={themeColors} />
     ));
   }
+
+  function changeMode(extMode: string) {
+    localStorage.setItem('mode', extMode);
+    setMode(extMode);
+  }
+
   function moreOptionClick(action : string, link : string) {
     let href = link;
     if (action !== 'feedback') {
@@ -62,6 +92,43 @@ const Notifications = ({ refetch } : Props) => {
   }
   return (
     <Box m={2}>
+      {!currentUser.CurrentUser && (
+        <Login setCurrentUser={setCurrentUser} themeColors={themeColors} />
+      )}
+
+      {currentUser.CurrentUser && (
+        <Button onClick={logout}>Logout</Button>
+      )}
+
+      <Box my={1}>
+        <Typography>Mode</Typography>
+        <Box width="100%" justifyContent="center" display="flex" flexDirection="row" alignItems="center" sx={{ border: 'solid 1px', borderRadius: '5px' }}>
+          <Box
+            width="50%"
+            justifyContent="center"
+            display="flex"
+            flexDirection="row"
+            alignItems="center"
+            sx={{ borderRight: 'solid 1px', padding: '10px', backgroundColor: (mode === 'light') ? 'gray' : 'transparent' }}
+            onClick={() => changeMode('light')}
+          >
+            <LightModeIcon />
+            <Typography>Light</Typography>
+          </Box>
+          <Box
+            width="50%"
+            justifyContent="center"
+            display="flex"
+            flexDirection="row"
+            alignItems="center"
+            sx={{ padding: '10px', backgroundColor: (mode === 'dark') ? 'gray' : 'transparent' }}
+            onClick={() => changeMode('dark')}
+          >
+            <NightlightOutlinedIcon />
+            <Typography>Dark</Typography>
+          </Box>
+        </Box>
+      </Box>
 
       {allNotifications.length > 0 && (
       <Box width="100%" justifyContent="center" display="flex" flexDirection="column" alignItems="center">

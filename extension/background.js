@@ -1,5 +1,12 @@
 chrome.browserAction.onClicked.addListener((tab) => {
   chrome.tabs.sendMessage(tab.id, 'toggle');
+  browser.tabs.query({currentWindow: true, active: true}).then((tabs) => {
+      let tab = tabs[0]; // Safe to assume there will only be one result
+      chrome.tabs.sendMessage(tab.id, {
+        message: 'currentTabInfo',
+        urlInfo: tab
+      });
+  }, console.error)
 });
 
 chrome.runtime.onMessage.addListener(
@@ -43,7 +50,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         { message: 'clicked_browser_action' },
         () => {
           chrome.tabs.captureVisibleTab({ format: 'png' }, (src) => {
-            chrome.storage.local.set({ screenshot: src }, () => {
+            storage.StorageArea.set({ screenshot: src }, () => {
               chrome.tabs.sendMessage(activeTab.id, 'toggle');
               chrome.tabs.sendMessage(
                 activeTab.id,
@@ -59,7 +66,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
   } else if (request.screenshot === 'clear') {
     // clear screenshot from storage
-    chrome.storage.local.remove('screenshot', () => {
+    storage.StorageArea.remove('screenshot', () => {
       sendResponse([]);
     });
   } else if (request.screenshot === 'createDiv') {
@@ -72,7 +79,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         { message: 'clicked_browser_action' },
         () => {
           chrome.tabs.captureVisibleTab({ format: 'png' }, (src) => {
-            chrome.storage.local.set({ screenshot: src }, () => {
+            storage.StorageArea.set({ screenshot: src }, () => {
               // console.log('Stored screenshot!');
               chrome.tabs.sendMessage(activeTab.id, 'toggle');
               chrome.scripting.executeScript(
@@ -96,7 +103,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.browserAction.setBadgeBackgroundColor({ color: [0, 0, 0, 0] });
     chrome.browserAction.setBadgeText({ text: '' });
   } else if (request.type && request.type === 'setBadge') {
-    chrome.browserAction.setBadgeText({ text: `${request.text}` });
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.browserAction.setBadgeText({ text: `${request.text}` });
+    });
   } else {
     // this message is a request, use background script to make request
     fetch(request.url, request.init).then(
@@ -129,6 +138,8 @@ chrome.runtime.onInstalled.addListener(() => {
   return false;
 });
 
+chrome.runtime.setUninstallURL('https://forms.gle/gBrENf235DqnTbcj9');
+
 chrome.tabs.onUpdated.addListener(
   (tabId, changeInfo) => {
     // read changeInfo data and do something with it
@@ -140,11 +151,3 @@ chrome.tabs.onUpdated.addListener(
     }
   }
 );
-
-chrome.cookies.getAll({}, cookies => {
-  let cookieStrings = [];
-  for (let cookie of cookies) {
-    cookieStrings.push(cookie.name + '=' + cookie.value + ';');
-  }
-  console.log('cookieStrings ::: ', cookieStrings);
-});
