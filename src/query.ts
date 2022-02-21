@@ -16,15 +16,6 @@ declare module 'axios' {
 }
 
 const defaultQueryFn = async ({ queryKey }) => {
-  chrome.cookies.set({
-    "name": "testnetvyne",
-    "url": "http://localhost:5002",
-    "value": "testvalue"
-}, function (cookie) {
-    console.log(JSON.stringify(cookie));
-    console.log(chrome.extension.lastError);
-    console.log(chrome.runtime.lastError);
-});
   const { data } = await axios.get(
     `${process.env.REACT_APP_PUBLIC_API}${queryKey[0]}`,
     {

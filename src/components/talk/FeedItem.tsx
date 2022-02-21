@@ -1,5 +1,6 @@
 import { SentimentSatisfiedAlt } from '@mui/icons-material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import FlagIcon from '@mui/icons-material/Flag';
 import ImageIcon from '@mui/icons-material/Image';
 import LinkIcon from '@mui/icons-material/Link';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
@@ -7,7 +8,6 @@ import PublicIcon from '@mui/icons-material/Public';
 import {
   Avatar, Box, Button, Grid, Link, Tooltip, Typography
 } from '@mui/material';
-// import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { DateTime } from 'luxon';
 import React from 'react';
 import ReactPlayer from 'react-player';
@@ -25,41 +25,11 @@ interface Props {
   // eslint-disable-next-line react/require-default-props
   initPost?: Post;
   defUser: User;
+  themeColors: any;
 }
 
-// const nonHiddenTheme = createTheme({
-//   components: {
-//     MuiLink: {
-//       styleOverrides: {
-//         root: {
-//           color: '#3f51b5',
-//           textDecoration: 'none',
-//           '@media (max-width: 768px)': {
-//             textOverflow: 'ellipsis',
-//             whiteSpace: 'nowrap',
-//             overflow: 'hidden',
-//             width: '145px',
-//             display: 'inline-block',
-//           },
-//         },
-//       },
-//     },
-//     MuiButton: {
-//       styleOverrides: {
-//         root: {
-//           color: '#3f51b5',
-//         },
-//         outlinedPrimary: {
-//           color: '#3f51b5',
-//           border: 'solid 1px #3f51b5',
-//         }
-//       },
-//     }
-//   }
-// });
-
 export default function FeedItem({
-  initWebsite, reg, initPost, defUser
+  initWebsite, reg, initPost, defUser, themeColors
 }: Props) {
   const [user] = React.useState<User>(defUser);
   const queryClient = useQueryClient();
@@ -99,24 +69,22 @@ export default function FeedItem({
     return false;
   }
 
-  let focus = -1;
-  if (window.location.search.includes('pfocus')) {
-    const urlParams = new URLSearchParams(window.location.search);
-    focus = parseInt(urlParams.get('pfocus') as string, 10);
+  function clickComment() {
+    if (website && website.ID) {
+      window.open(`${process.env.PUBLIC_WEB}/w/${website.ID}`, '_blank', 'noopener,noreferrer');
+    }
+    return false;
   }
   const hidden = (
     <Grid
       container
       component={Box}
-      bgcolor={initPost?.ID === focus
-        ? '#f5f77b'
-        : '#ffffff'}
+      bgcolor={themeColors.commentParent}
       direction="column"
-      boxShadow={3}
-      m={1}
       p={1}
       borderRadius="borderRadius"
       wrap="nowrap"
+      color={themeColors.commentText}
     >
       <Typography variant="h6" color="primary">This Feed Item contains possibly sensitive material.</Typography>
       <Typography variant="subtitle2">Please take caution before viewing. </Typography>
@@ -124,19 +92,15 @@ export default function FeedItem({
     </Grid>
   );
   const nonHidden = (
-    // <ThemeProvider theme={nonHiddenTheme}>
     <Grid
       container
       component={Box}
-      bgcolor={initPost?.ID === focus
-        ? '#f5f77b'
-        : '#ffffff'}
+      bgcolor={themeColors.commentParent}
       direction="column"
-      boxShadow={1}
-      m={1}
       p={1}
       borderRadius="borderRadius"
       wrap="nowrap"
+      color={themeColors.commentText}
     >
       <Grid item>
         <Grid container direction="row" alignItems="flex-start" spacing={2}>
@@ -151,14 +115,27 @@ export default function FeedItem({
             </Link>
           </Grid>
           <Grid item component={Box} fontSize="15px" flexGrow={1}>
-            <Grid container direction="row" alignItems="center">
-              <Grid item>
-                <AccessTimeIcon style={{ fill: 'grey' }} fontSize="inherit" />
+            <Grid container direction="row" alignItems="center" justifyContent="space-between">
+              <Grid item sx={{ display: 'flex' }}>
+                <Grid item>
+                  <AccessTimeIcon style={{ fill: 'grey' }} fontSize="inherit" />
+                </Grid>
+                <Grid item component={Box} pl={0.5}>
+                  <Typography noWrap variant="caption">
+                    {DateTime.fromISO(website.CreatedAt.toString(), { zone: 'utc' }).toRelative()}
+                  </Typography>
+                </Grid>
               </Grid>
-              <Grid item component={Box} pl={0.5}>
-                <Typography noWrap variant="caption" style={{ color: 'grey' }}>
-                  {DateTime.fromISO(website.CreatedAt.toString(), { zone: 'utc' }).toRelative()}
-                </Typography>
+              <Grid item alignItems="center">
+                <FlagWebsite
+                  open={showFlag}
+                  handleClose={() => setShowFlag(false)}
+                  website={website}
+                />
+                <Box>
+                  <FlagIcon onClick={() => { setShowFlag(true); }} style={{ fill: 'grey' }} fontSize="inherit" />
+                  {/* <Button size="small" onClick={() => { setShowFlag(true); }}>Flag</Button> */}
+                </Box>
               </Grid>
             </Grid>
           </Grid>
@@ -169,11 +146,6 @@ export default function FeedItem({
               website={website}
               setWebsite={setWebsite}
             />
-            <Box>
-              {website.Public
-                ? <Button variant="outlined" size="small" onClick={() => { setShowShare(true); }}>Vyne</Button>
-                : <Button onClick={() => { setShowShare(true); }}>Publish</Button>}
-            </Box>
           </Grid>
         </Grid>
       </Grid>
@@ -201,7 +173,7 @@ export default function FeedItem({
             </Avatar>
           </Grid>
           <Grid item component={Box} xs={11}>
-            <a href={website.URL} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', color: 'black' }}>
+            <a href={website.URL} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', color: themeColors.commentText }}>
               <Grid container component={Box} pl={1} direction="column">
                 <Grid item component={Box} width="auto">
                   <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', width: 'auto' }}>
@@ -281,16 +253,10 @@ export default function FeedItem({
                         )}
                       </Box>
                     ) : <Button size="small">Processing</Button>}
-                  {/* {(website.TagLabelNames)?.length > 0
-                    ? website.TagLabelNames?.map((t) => (
-                      <Button size="small" href={`/v/${t}`}>
-                        {t}
-                      </Button>
-                    )) : <Button size="small">Processing</Button>} */}
                 </Grid>
               )}
           <Grid item component={Box}>
-            <Button size="small" href={`/w/${website.ID}`}>
+            <Button size="small" onClick={() => clickComment()}>
               {website.ShoutCount}
               {' '}
               comments
@@ -329,16 +295,6 @@ export default function FeedItem({
             </Button>
           </Grid>
           )}
-          <Grid item container alignItems="center">
-            <FlagWebsite
-              open={showFlag}
-              handleClose={() => setShowFlag(false)}
-              website={website}
-            />
-            <Box>
-              <Button size="small" onClick={() => { setShowFlag(true); }}>Flag</Button>
-            </Box>
-          </Grid>
           {(user?.Role === 'mod' || user?.Role === 'admin')
               && (
                 <Button size="small" onClick={() => clickMod()}>
@@ -349,7 +305,6 @@ export default function FeedItem({
         </Grid>
       </Grid>
     </Grid>
-    // </ThemeProvider>
   );
   return (
     <>

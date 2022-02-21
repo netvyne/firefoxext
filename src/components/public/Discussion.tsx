@@ -1,12 +1,11 @@
 /* eslint-disable max-len */
-// import HCaptcha from '@hcaptcha/react-hcaptcha';
 import {
   Box, MenuItem, Select
 } from '@mui/material';
 import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
 import { AxiosError } from 'axios';
+import { sha256 } from 'js-sha256';
 import React from 'react';
-// import React, { useEffect } from 'react';
 import { useMutation, useQuery } from 'react-query';
 import {
   Shout, User, Website
@@ -19,8 +18,11 @@ import './styles.scss';
 
 interface Props {
   initCurrentUser: User[];
-  autoFetch: boolean;
   initURL: any;
+  sort: string;
+  setSort: any;
+  isTabUpdated: boolean;
+  themeColors: any;
 }
 
 interface GetShoutTreesQuery {
@@ -74,23 +76,23 @@ const discussionTheme = createTheme({
   }
 });
 const Discussion = ({
-  initCurrentUser, autoFetch, initURL
+  initCurrentUser, initURL, sort, setSort, isTabUpdated, themeColors
 } : Props) => {
   // eslint-disable-next-line global-require
-  // const [url, setUrl] = React.useState<any>({});
   const user : any = initCurrentUser;
   const [showForm, setShowForm] = React.useState(true);
-  const [sort, setSort] = React.useState('best');
   const [showCaptcha, setShowCaptcha] = React.useState(false);
   const [captchaToken, setCaptchaToken] = React.useState('');
   const [children, setChildren] = React.useState<Shout[]>([]);
   const captchaRef = React.createRef<HCaptcha>();
   const [comment, setComment] = React.useState('');
+  const treeHeight = window.innerHeight - 392;
 
-  const route = `/get_shout_trees?host=${initURL?.host}&pathname=${initURL?.pathname}&search=${encodeURIComponent(initURL?.search)}&sort=${sort}`;
+  const urlHash = sha256(`${initURL?.host}${initURL?.pathname}${initURL?.search}`);
+  const route = `/get_shout_trees?url_hash=${urlHash}&sort=${sort}`;
   const { data, status, refetch } = useQuery<GetShoutTreesQuery, string>(
     route, {
-      enabled: autoFetch,
+      enabled: isTabUpdated,
       onSuccess: (shoutData) => {
         setChildren(shoutData.Roots);
       }
@@ -133,7 +135,7 @@ const Discussion = ({
   let reply: any = '';
 
   if (status === 'loading') {
-    trees = <ShoutPlaceholder />;
+    trees = <Box sx={{ marginLeft: '8px' }}><ShoutPlaceholder /></Box>;
   } else if (status === 'success' && user) {
     if (children) {
       trees = children.map((treeRoot) => (
@@ -142,6 +144,7 @@ const Discussion = ({
           website={data!.Website}
           treeRoot={treeRoot}
           defUser={user}
+          themeColors={themeColors}
         />
       ));
     }
@@ -155,6 +158,7 @@ const Discussion = ({
         showCaptcha={showCaptcha}
         captchaRef={captchaRef}
         setCaptchaToken={setCaptchaToken}
+        themeColors={themeColors}
       />
     );
   }
@@ -170,7 +174,7 @@ const Discussion = ({
         value={sort}
         label="Sort"
         onChange={(event : any) => setSort(event.target.value)}
-        style={{ height: '25px' }}
+        style={{ height: '25px', backgroundColor: themeColors.divBackground, color: themeColors.commentText }}
       >
         <MenuItem value="top">Top</MenuItem>
         <MenuItem value="best">Best</MenuItem>
@@ -187,8 +191,9 @@ const Discussion = ({
           {reply}
         </Box>
         <Box style={{
-          height: '540px',
-          overflow: 'auto'
+          height: `${treeHeight}px`,
+          overflow: 'auto',
+          marginLeft: '-8px'
         }}
         >
           {trees}

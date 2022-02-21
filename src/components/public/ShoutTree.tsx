@@ -1,10 +1,8 @@
 /* eslint-disable max-len */
-// import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-// import GavelIcon from '@mui/icons-material/Gavel';
 import ReplyIcon from '@mui/icons-material/Reply';
 import SendIcon from '@mui/icons-material/Send';
 import {
-  Box, Button, CssBaseline, Grid, Typography
+  Alert, Box, Button, Grid, Snackbar, Typography
 } from '@mui/material';
 import MDEditor from '@uiw/react-md-editor';
 import { AxiosError } from 'axios';
@@ -15,7 +13,6 @@ import { useMutation, useQuery } from 'react-query';
 import { Shout, User, Website } from '../../../types/common/types';
 import HCaptcha from '../common/hcaptcha';
 import DeleteShout from './DeleteShout';
-// import LeaveReply from './LeaveReply';
 import ShoutVoteButtons from './ShoutVoteButtons';
 import './styles.scss';
 import UserKarma from './UserKarma';
@@ -24,6 +21,7 @@ interface Props {
   website: Website;
   treeRoot: Shout;
   defUser: User;
+  themeColors: any;
 }
 
 interface GetShoutTreesQuery {
@@ -36,11 +34,10 @@ interface SuccessResponse {
 }
 
 const ShoutTree = ({
-  treeRoot, website, defUser
+  treeRoot, website, defUser, themeColors
 }: Props) => {
   const [user] = React.useState<User>(defUser);
   const [root, setRoot] = React.useState<Shout>(treeRoot);
-  // const [showFlag, setShowFlag] = React.useState(false);
   const [children, setChildren] = React.useState<Shout[]>(root.Children || []);
   const [hide, setHide] = React.useState(root.Warn);
   const [clicked, setClicked] = React.useState(false);
@@ -51,6 +48,7 @@ const ShoutTree = ({
   const [showCaptcha, setShowCaptcha] = React.useState(false);
   const [captchaToken, setCaptchaToken] = React.useState('');
   const captchaRef = React.createRef<HCaptcha>();
+  const [shoutDeleted, setShoutDeleted] = React.useState(false);
 
   function toggleUserKarmaOpen() {
     setUserKarmaOpen(!userKarmaOpen);
@@ -77,7 +75,6 @@ const ShoutTree = ({
         onSuccess: (data: any) => {
           root.Saved = data.Shout.Saved;
           setRoot(root);
-          // refetch();
         },
       },
     );
@@ -171,6 +168,7 @@ const ShoutTree = ({
           website={website}
           treeRoot={shout}
           defUser={user}
+          themeColors={themeColors}
         />
       ))}
       {(root.MoreReplies && root.MoreReplies.length > 0)
@@ -188,7 +186,7 @@ const ShoutTree = ({
     // Content is just children directly without a parent comment
     content = innerContent;
   } else {
-    const color = root.Level % 2 === 0 ? '#eceff1' : '#fafafa';
+    const color = root.Level % 2 === 0 ? themeColors.commentParent : themeColors.commentChild;
     content = (
       <Grid
         item
@@ -202,6 +200,7 @@ const ShoutTree = ({
         borderRadius="borderRadius"
         direction="column"
         style={{ margin: '0px', marginBottom: '5px' }}
+        color={themeColors.commentText}
       >
         <Grid item container direction="row" wrap="nowrap">
           {/* @ts-ignore */}
@@ -237,8 +236,6 @@ const ShoutTree = ({
                 )
                 : <ReactMarkdown>{root.Comment}</ReactMarkdown>}
             </Grid>
-
-            {/* <Grid item container component={Box} wrap="nowrap" spacing={1} style={{ display: 'flex', flexDirection: 'column' }}> */}
             <Grid container wrap="nowrap" alignItems="center" sx={{ height: '30px' }}>
               <ShoutVoteButtons
                 initShout={root}
@@ -261,7 +258,7 @@ const ShoutTree = ({
                 {root.Saved ? 'UNDO' : 'SAVE'}
               </Button>
               {user.UserName === root.Author.UserName
-                && <DeleteShout initShout={root} setRoot={setRoot} />}
+                && <DeleteShout initShout={root} setRoot={setRoot} setShoutDeleted={setShoutDeleted} />}
               {(user?.IsMod)
                     && (
                       <Button href={`${process.env.REACT_APP_MOD_URL}/item/shout/${root.ID}`} target="_blank">
@@ -270,72 +267,9 @@ const ShoutTree = ({
                       </Button>
                     )}
             </Grid>
-            {/* <LeaveReply website={website} parent={root} setChildren={setChildren} /> */}
-            {/* <Grid item style={{ display: 'flex', flexDirection: 'row' }}>
-                <Box>
-                  <ShoutVoteButtons
-                    initShout={root}
-                    defUser={defUser}
-                  />
-                  {!showForm && (
-                    <Button size="small" onClick={() => setShowForm(!showForm)}>
-                      <ReplyIcon />
-                      Reply
-                    </Button>
-                  )}
-                </Box>
-                {!root.Saved && defUser.Registered && (
-                  <Box>
-                    <Button
-                      disabled={clicked}
-                      size="small"
-                      onClick={(e) => {
-                        onSaveItem(e, true);
-                        setClicked(true);
-                      }}
-                      style={{ color: '#000000' }}
-                    >
-                      SAVE
-                      <BookmarkBorderIcon />
-                    </Button>
-                  </Box>
-                )}
-                {root.Saved && defUser.Registered && (
-                  <Box>
-                    <Button
-                      disabled={clicked}
-                      size="small"
-                      onClick={(e) => {
-                        onSaveItem(e, false);
-                        setClicked(true);
-                      }}
-                      style={{ color: '#000000' }}
-                    >
-                      UNDO
-                      <BookmarkBorderIcon />
-                    </Button>
-                  </Box>
-                )}
-                {(user?.Role === 'mod' || user?.Role === 'admin')
-                  && (
-                    <Button href={`${process.env.REACT_APP_MOD_URL}/shout/${root.ID}`} target="_blank" style={{ color: '#000000' }}>
-                      MOD
-                      {' '}
-                      <GavelIcon />
-                    </Button>
-                  )}
-                {defUser.UserName === root.Author.UserName
-                    && (
-                      <DeleteShout
-                        initShout={root}
-                        setRoot={setRoot}
-                      />
-                    )}
-              </Grid> */}
             {showForm && (
               commentForm
             )}
-            {/* </Grid> */}
           </Grid>
         </Grid>
 
@@ -346,7 +280,16 @@ const ShoutTree = ({
     );
   }
 
-  return <CssBaseline>{content}</CssBaseline>;
+  return (
+    <Box ml={1}>
+      {content}
+      <Snackbar style={{ zIndex: 10000 }} anchorOrigin={{ vertical: 'top', horizontal: 'center' }} open={shoutDeleted} autoHideDuration={3000} onClose={() => setShoutDeleted(false)}>
+        <Alert onClose={() => setShoutDeleted(false)} severity="success">
+          Success!
+        </Alert>
+      </Snackbar>
+    </Box>
+  );
 };
 
 export default ShoutTree;
