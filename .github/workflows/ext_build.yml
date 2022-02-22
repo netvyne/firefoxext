@@ -1,0 +1,30 @@
+name: Firefox Ext Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.13.0
+      - name: Setup Firefox Ext
+        env:
+          NODE_ENV: staging
+          REACT_APP_PUBLIC_API: https://staging-api.netvyne.com/api
+          REACT_APP_VERSION: 0.0
+          REACT_APP_MOD_URL: https://www.netvyne.com/mod
+          REACT_APP_IMG_URL: https://staging-img.netvyne.com
+          REACT_APP_CAPTCHA_SITE_KEY: "b22ccc83-90b3-44d9-8ea8-3f434b9a6316"
+        run: |
+          yarn install
+          npm run lint
+          yarn build 
+          # npm run test -- --coverage
