@@ -2,10 +2,13 @@
 import CancelIcon from '@mui/icons-material/Cancel';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import ReplyIcon from '@mui/icons-material/Reply';
-import {
-  Box, Button, Grid, IconButton, Paper,
-  TextField, Typography
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
 import { Picker } from 'emoji-mart';
 import 'emoji-mart/css/emoji-mart.css';
@@ -202,7 +205,7 @@ const Chat = ({ initURL, themeColors } : Props) => {
               setParentChat(message);
             }}
           >
-            <ReplyIcon style={{ color: themeColors.toggleButton }}/>
+            <ReplyIcon style={{ color: themeColors.toggleButton }} />
 
           </button>
         </div>

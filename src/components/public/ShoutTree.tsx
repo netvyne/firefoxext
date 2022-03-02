@@ -1,9 +1,12 @@
 /* eslint-disable max-len */
 import ReplyIcon from '@mui/icons-material/Reply';
 import SendIcon from '@mui/icons-material/Send';
-import {
-  Alert, Box, Button, Grid, Snackbar, Typography
-} from '@mui/material';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import Snackbar from '@mui/material/Snackbar';
+import Typography from '@mui/material/Typography';
 import MDEditor from '@uiw/react-md-editor';
 import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';

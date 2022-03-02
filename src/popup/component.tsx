@@ -1,9 +1,16 @@
 /* eslint-disable max-len */
 import HomeIcon from '@mui/icons-material/Home';
 import PublicIcon from '@mui/icons-material/Public';
-import {
-  AppBar, Avatar, Badge, Box, Grid, PaletteMode, Tab, Tabs, Typography
-} from '@mui/material/';
+import AppBar from '@mui/material/AppBar';
+import Avatar from '@mui/material/Avatar';
+import Badge from '@mui/material/Badge';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+// import { PaletteMode } from '@mui/material/PaletteMode';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Typography from '@mui/material/Typography';
+
 import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
 import Public from '@src/components/public/Public';
 import { sha256 } from 'js-sha256';
@@ -65,10 +72,9 @@ export const Popup: FunctionComponent = () => {
   const [autoFetch, setAutoFetch] = React.useState<any>(false);
   const [user, setUser] = React.useState<User|any>();
   const [url, setUrl] = useState<any>({});
-  // eslint-disable-next-line no-unused-vars
   const [isTabActive, setIsTabActive] = useState<any>(false);
   const [isTabUpdated, setIsTabUpdated] = useState(false);
-  const [mode, setMode] = useState<PaletteMode>('light');
+  const [mode, setMode] = useState<any>('light');
   const [themeColors, setThemeColors] = React.useState<any>('');
   const intervalMs = 5000;
 
@@ -80,8 +86,7 @@ export const Popup: FunctionComponent = () => {
     browser.runtime.sendMessage({ popupMounted: true });
   }, []);
 
-
-  const getDesignTokens = (extMode: PaletteMode) => ({
+  const getDesignTokens = (extMode: any) => ({
     palette: {
       mode: extMode
     },
@@ -201,7 +206,7 @@ export const Popup: FunctionComponent = () => {
           }, 2000);
         }
 
-        if(request.message === 'currentTabInfo'){
+        if (request.message === 'currentTabInfo') {
           const newUrl : any = isValidURL(request.urlInfo.url);
           const formatedUrl = {
             pathname: newUrl.pathname,

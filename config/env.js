@@ -74,6 +74,7 @@ function getClientEnvironment(publicUrl) {
   } else {
     process.env.REACT_APP_PUBLIC_API = 'https://api.netvyne.com/api';
     process.env.PUBLIC_WEB = 'https://www.netvyne.com';
+    process.env.REACT_APP_VERSION = '1.0.0';
   }
   const raw = Object.keys(process.env)
     .filter((key) => REACT_APP.test(key))

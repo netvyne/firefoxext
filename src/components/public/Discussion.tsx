@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
-import {
-  Box, MenuItem, Select
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
 import { AxiosError } from 'axios';
 import { sha256 } from 'js-sha256';

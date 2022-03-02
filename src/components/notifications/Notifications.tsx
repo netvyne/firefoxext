@@ -1,12 +1,11 @@
 import LightModeIcon from '@mui/icons-material/LightMode';
 import NightlightOutlinedIcon from '@mui/icons-material/NightlightOutlined';
-import {
-  Box, Button, Typography
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import React from 'react';
 import { useMutation, useQuery } from 'react-query';
 import NotificationBox from './NotificationBox';
-import Login from './Login';
 
 interface Props {
   refetch: any;
@@ -22,17 +21,6 @@ const Notifications = ({
   refetch, mode, setMode, themeColors
 } : Props) => {
   const [allNotifications, setAllNotifications] = React.useState<any>([]);
-  const [currentUser, setCurrentUser] = React.useState<any>([]);
-
-  React.useEffect(() => {
-    let loggedinUser: any = localStorage.getItem('netvyneUser');
-    if(loggedinUser !== ""){
-      loggedinUser = JSON.parse(loggedinUser);
-    }
-    if (loggedinUser && loggedinUser.CurrentUser) {
-      setCurrentUser(loggedinUser);
-    }
-  }, []);
 
   const notificationsQuery = useQuery<GetUserNotifsQuery, string>(
     '/get_user_notifications', { onSuccess: (data) => setAllNotifications(data.Notifications) }
@@ -53,18 +41,13 @@ const Notifications = ({
         data: mutateData,
       },
       {
-        onSuccess: (response : any) => {
+        onSuccess: () => {
           refetch();
         },
       },
     );
     return res;
   };
-
-  function logout(){
-    localStorage.removeItem('netvyneUser');
-    setCurrentUser([]);
-  }
 
   let notifications: any = '';
   if (notificationsQuery.status === 'error') {
@@ -92,13 +75,13 @@ const Notifications = ({
   }
   return (
     <Box m={2}>
-      {!currentUser.CurrentUser && (
+      {/* {!currentUser.CurrentUser && (
         <Login setCurrentUser={setCurrentUser} themeColors={themeColors} />
       )}
 
       {currentUser.CurrentUser && (
         <Button onClick={logout}>Logout</Button>
-      )}
+      )} */}
 
       <Box my={1}>
         <Typography>Mode</Typography>
