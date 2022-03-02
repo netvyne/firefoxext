@@ -1,9 +1,9 @@
 /* eslint-disable linebreak-style */
 import ReplyIcon from '@mui/icons-material/Reply';
 import SendIcon from '@mui/icons-material/Send';
-import {
-  Box, Button
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 import MDEditor from '@uiw/react-md-editor';
 import React from 'react';
 import HCaptcha from '../common/hcaptcha';
@@ -25,18 +25,36 @@ const ReplyUI = ({
   postComment, setComment, comment, showForm, setShowForm, showCaptcha,
   captchaRef, setCaptchaToken, themeColors
 }: Props) => {
+  const [showFullEditor, setShowFullEditor] = React.useState(false);
   const commentForm = (
     <form onSubmit={postComment}>
-      <MDEditor
-        textareaProps={{
-          placeholder: 'Leave a reply...',
-        }}
-        height={100}
-        value={comment}
-        preview="edit"
-        style={{ backgroundColor: themeColors.divBackground }}
-        onChange={(value: string | undefined) => value !== undefined && setComment(value)}
-      />
+      <Button onClick={() => setShowFullEditor(!showFullEditor)}>
+        {showFullEditor ? 'Basic Editor' : 'Full Editor'}
+      </Button>
+      {showFullEditor && (
+        <MDEditor
+          textareaProps={{
+            placeholder: 'Leave a reply...',
+          }}
+          height={100}
+          value={comment}
+          preview="edit"
+          style={{ backgroundColor: themeColors.divBackground }}
+          onChange={(value: string | undefined) => value !== undefined && setComment(value)}
+        />
+      )}
+      {!showFullEditor && (
+        <TextField
+          fullWidth
+          multiline
+          variant="outlined"
+          id="outlined-basic"
+          label="Leave a reply..."
+          placeholder="Leave a reply..."
+          onInput={(e: any) => setComment(e.target.value)}
+          value={comment}
+        />
+      )}
       <Box my={1}>
         <Button
           type="submit"
@@ -44,6 +62,7 @@ const ReplyUI = ({
           endIcon={<SendIcon />}
           fullWidth
           style={{ color: 'white', backgroundColor: '#54dc3c' }}
+          disabled={comment.trim().length === 0}
         >
           {' '}
           Submit

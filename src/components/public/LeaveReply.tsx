@@ -1,8 +1,7 @@
 import ReplyIcon from '@mui/icons-material/Reply';
 import SendIcon from '@mui/icons-material/Send';
-import {
-  Box, Button
-} from '@mui/material';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
 import MDEditor from '@uiw/react-md-editor';
 import { AxiosError } from 'axios';
 import React from 'react';
@@ -77,7 +76,7 @@ const LeaveReply = ({
       >
         Cancel
       </Button>
-      <Button type="submit" size="small" color="primary" endIcon={<SendIcon />}>
+      <Button type="submit" size="small" color="primary" disabled={comment.trim().length === 0} endIcon={<SendIcon />}>
         {' '}
         Submit
         {' '}

@@ -34,6 +34,8 @@ yarn-error.log*
 # Distribution / packaging
 bin/
 build/
+extension/js/*
+public/*
 develop-eggs/
 eggs/
 lib/
