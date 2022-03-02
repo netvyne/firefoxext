@@ -1,5 +1,3 @@
-import { browser } from "./__mocks__/webextension-polyfill-ts";
-
 export function fetchResource(url : any, init : any) {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage({ url, init }, (messageResponse) => {
@@ -63,7 +61,7 @@ export function isValidURL(url : any) {
 export function createDiv() {
   // action is either clear or take
   return new Promise(() => {
-    chrome.runtime.sendMessage({ screenshot: 'createDiv' }, (response) => {
+    chrome.runtime.sendMessage({ screenshot: 'createDiv' }, () => {
     });
   });
 }
