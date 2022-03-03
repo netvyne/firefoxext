@@ -1,4 +1,4 @@
-import { SentimentSatisfiedAlt } from '@mui/icons-material';
+import SentimentSatisfiedAlt from '@mui/icons-material/SentimentSatisfiedAlt';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import FlagIcon from '@mui/icons-material/Flag';
 import ImageIcon from '@mui/icons-material/Image';

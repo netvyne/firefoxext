@@ -2,7 +2,9 @@
 import Box from '@mui/material/Box';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
+import createTheme from '@mui/material/styles/createTheme';
+import styled from '@mui/material/styles/styled';
+import ThemeProvider from '@mui/material/styles/ThemeProvider'; 
 import { sha256 } from 'js-sha256';
 import React from 'react';
 import { useQuery } from 'react-query';

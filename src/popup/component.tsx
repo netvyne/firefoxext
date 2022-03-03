@@ -6,12 +6,13 @@ import Avatar from '@mui/material/Avatar';
 import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-// import { PaletteMode } from '@mui/material/PaletteMode';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 
-import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
+import createTheme from '@mui/material/styles/createTheme';
+import styled from '@mui/material/styles/styled';
+import ThemeProvider from '@mui/material/styles/ThemeProvider'; 
 import Public from '@src/components/public/Public';
 import { sha256 } from 'js-sha256';
 import React, { FunctionComponent, useEffect, useState } from 'react';

@@ -2,7 +2,9 @@
 import Box from '@mui/material/Box';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
+import createTheme from '@mui/material/styles/createTheme';
+import styled from '@mui/material/styles/styled';
+import ThemeProvider from '@mui/material/styles/ThemeProvider'; 
 import { AxiosError } from 'axios';
 import { sha256 } from 'js-sha256';
 import React from 'react';
