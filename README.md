@@ -22,6 +22,17 @@
 - Include screenshots natively when sharing with friends
 - Get fast, friendly support from the Netvyne team
 
+## Development
+
+After checking out the repo run the follow these steps
+
+```shell
+export NODE_ENV="production"
+$ yarn install
+$ npm run build
+```
+
+
 ## Contributing
 
 If you encounter any issues with the extension, or if there's something you'd like to see added, please open an issue on Github!

@@ -67,14 +67,21 @@ function getClientEnvironment(publicUrl) {
     // process.env.PUBLIC_API = "http://localhost:5000/api";
     process.env.PUBLIC_WEB = 'http://localhost:3000';
     process.env.REACT_APP_PUBLIC_API = 'http://localhost:5002/api';
-    process.env.REACT_APP_VERSION = '2.0.0';
+    process.env.REACT_APP_VERSION = '1.0.0';
+    process.env.REACT_APP_IMG_URL = 'http://localhost:5002/imgproxy';
+    process.env.REACT_APP_CAPTCHA_SITE_KEY = '10000000-ffff-ffff-ffff-000000000001';
   } else if (process.env.NODE_ENV === 'staging') {
     process.env.REACT_APP_PUBLIC_API = 'https://staging-api.netvyne.com/api';
     process.env.PUBLIC_WEB = 'https://staging.netvyne.com';
+    process.env.REACT_APP_VERSION = '1.0.0';
+    process.env.REACT_APP_IMG_URL = 'https://staging-img.netvyne.com';
+    process.env.REACT_APP_CAPTCHA_SITE_KEY = '10000000-ffff-ffff-ffff-000000000001';
   } else {
     process.env.REACT_APP_PUBLIC_API = 'https://api.netvyne.com/api';
     process.env.PUBLIC_WEB = 'https://www.netvyne.com';
     process.env.REACT_APP_VERSION = '1.0.0';
+    process.env.REACT_APP_IMG_URL = 'https://img.netvyne.com';
+    process.env.REACT_APP_CAPTCHA_SITE_KEY = '10000000-ffff-ffff-ffff-000000000001';
   }
   const raw = Object.keys(process.env)
     .filter((key) => REACT_APP.test(key))

@@ -11,7 +11,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import createTheme from '@mui/material/styles/createTheme';
 import styled from '@mui/material/styles/styled';
-import ThemeProvider from '@mui/material/styles/ThemeProvider'; 
+import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import { Picker } from 'emoji-mart';
 import 'emoji-mart/css/emoji-mart.css';
 import { sha256 } from 'js-sha256';
