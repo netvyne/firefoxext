@@ -32,6 +32,22 @@ $ yarn install
 $ npm run build
 ```
 
+## Operating system
+
+Code has been tested on the following operating systems
+
+| Operating System | Version |
+|------------------|------------|
+| macOS X | \>= 10.9 |
+| Windows | \>= v0.12.0 |
+| Ubuntu | \>= 12.04 |
+
+## Build environment
+
+| Node | \>=v16.13.1 |
+|------------------|------------|
+| npm | \>= 8.3.0 |
+
 
 ## Contributing
 
