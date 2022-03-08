@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 
 import createTheme from '@mui/material/styles/createTheme';
 import styled from '@mui/material/styles/styled';
-import ThemeProvider from '@mui/material/styles/ThemeProvider'; 
+import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import Public from '@src/components/public/Public';
 import { sha256 } from 'js-sha256';
 import React, { FunctionComponent, useEffect, useState } from 'react';
@@ -74,18 +74,11 @@ export const Popup: FunctionComponent = () => {
   const [user, setUser] = React.useState<User|any>();
   const [url, setUrl] = useState<any>({});
   const [isTabActive, setIsTabActive] = useState<any>(false);
+  const [isExtClosed, setIsExtClosed] = useState<any>(true);
   const [isTabUpdated, setIsTabUpdated] = useState(false);
   const [mode, setMode] = useState<any>('light');
   const [themeColors, setThemeColors] = React.useState<any>('');
   const intervalMs = 5000;
-
-  // Sends the `popupMounted` event
-  React.useEffect(() => {
-    chrome.storage.sync.set({
-      isExtClosed: true,
-    });
-    browser.runtime.sendMessage({ popupMounted: true });
-  }, []);
 
   const getDesignTokens = (extMode: any) => ({
     palette: {
@@ -101,20 +94,21 @@ export const Popup: FunctionComponent = () => {
   }, [mode]);
 
   React.useEffect(() => {
-    const preferredMode = localStorage.getItem('mode');
-    if (preferredMode === 'light' || preferredMode === 'dark') {
-      setMode(preferredMode);
-    } else {
-      setMode('light');
-    }
+    let preferredMode: string = '';
+    chrome.storage.local.get('mode', (result) => {
+      preferredMode = result.mode;
+      if (preferredMode === 'light' || preferredMode === 'dark') {
+        setMode(preferredMode);
+      } else {
+        setMode('light');
+      }
+    });
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg === 'toggle') {
-        chrome.storage.sync.get(['isExtClosed'], (result) => {
+        chrome.storage.local.get('isExtClosed', (result) => {
           if (result.isExtClosed === true) {
             chrome.storage.sync.get(
-              {
-                netvyneBadge: true,
-              },
+              'netvyneBadge',
               (items) => {
                 if (items.netvyneBadge === true || items.netvyneBadge === null) {
                   setIsTabUpdated(true);
@@ -126,6 +120,7 @@ export const Popup: FunctionComponent = () => {
               }
             );
           } else {
+            setIsExtClosed(false);
             setIsTabUpdated(true);
             setAutoFetch(true);
             setIsTabActive(true);
@@ -135,12 +130,10 @@ export const Popup: FunctionComponent = () => {
     });
     browser.runtime.sendMessage({ popupMounted: true });
 
-    chrome.storage.sync.get(['isExtClosed'], (result) => {
+    chrome.storage.local.get('isExtClosed', (result) => {
       if (result.isExtClosed === true) {
         chrome.storage.sync.get(
-          {
-            netvyneBadge: true,
-          },
+          'netvyneBadge',
           (items) => {
             if (items.netvyneBadge === true || items.netvyneBadge === null) {
               setAutoFetch(true);
@@ -220,7 +213,6 @@ export const Popup: FunctionComponent = () => {
           if (autoFetch) {
             refetch();
           }
-          // console.log(' urlInfo :::: ', request.urlInfo);
         }
       }
     );
@@ -230,10 +222,10 @@ export const Popup: FunctionComponent = () => {
     if (chrome.tabs) {
       chrome.tabs.query(queryInfo, (tabs) => {
         const newUrl : any = isValidURL(tabs[0].url);
-        // setIsTabActive(true);
         let formatedUrl = {
           pathname: newUrl.pathname,
           host: newUrl.host,
+          origin: newUrl.origin,
           search: newUrl.search,
           Title: tabs[0].title,
         };
@@ -295,7 +287,7 @@ export const Popup: FunctionComponent = () => {
                             <Avatar
                               style={{ width: 24, height: 24 }}
                               alt="Avatar"
-                              src={formatImageURL(user.AvatarPath)}
+                              src={!isExtClosed ? formatImageURL(user.AvatarPath) : ''}
                             />
                           )
                             : (

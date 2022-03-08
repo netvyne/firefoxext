@@ -1,10 +1,11 @@
 /* eslint-disable max-len */
 import Box from '@mui/material/Box';
 import MenuItem from '@mui/material/MenuItem';
+import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import createTheme from '@mui/material/styles/createTheme';
 import styled from '@mui/material/styles/styled';
-import ThemeProvider from '@mui/material/styles/ThemeProvider'; 
+import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import { AxiosError } from 'axios';
 import { sha256 } from 'js-sha256';
 import React from 'react';
@@ -89,10 +90,11 @@ const Discussion = ({
   const captchaRef = React.createRef<HCaptcha>();
   const [comment, setComment] = React.useState('');
   const treeHeight = window.innerHeight - 392;
+  const [showFullEditor, setShowFullEditor] = React.useState(false);
 
   const urlHash = sha256(`${initURL?.host}${initURL?.pathname}${initURL?.search}`);
   const route = `/get_shout_trees?url_hash=${urlHash}&sort=${sort}`;
-  const { data, status, refetch } = useQuery<GetShoutTreesQuery, string>(
+  const { data, status } = useQuery<GetShoutTreesQuery, string>(
     route, {
       enabled: isTabUpdated,
       onSuccess: (shoutData) => {
@@ -108,7 +110,6 @@ const Discussion = ({
         setShowCaptcha(false);
         setCaptchaToken('');
         setChildren((c) => ((c && c.length > 0) ? [mutationData.Shout, ...c] : [mutationData.Shout]));
-        refetch();
       },
       onError: (err: AxiosError) => {
         if (err.response?.status === 402) {
@@ -160,7 +161,7 @@ const Discussion = ({
         showCaptcha={showCaptcha}
         captchaRef={captchaRef}
         setCaptchaToken={setCaptchaToken}
-        themeColors={themeColors}
+        showFullEditor={showFullEditor}
       />
     );
   }
@@ -168,21 +169,28 @@ const Discussion = ({
     <Box
       p={1}
       height="40px"
+      display="flex"
+      justifyContent="space-between"
     >
-      Sort:
-      {' '}
-      <Select
-        size="small"
-        value={sort}
-        label="Sort"
-        onChange={(event : any) => setSort(event.target.value)}
-        style={{ height: '25px', backgroundColor: themeColors.divBackground, color: themeColors.commentText }}
-      >
-        <MenuItem value="top">Top</MenuItem>
-        <MenuItem value="best">Best</MenuItem>
-        <MenuItem value="old">Old</MenuItem>
-        <MenuItem value="new">New</MenuItem>
-      </Select>
+      <Box>
+        Sort:
+        {' '}
+        <Select
+          size="small"
+          value={sort}
+          label="Sort"
+          onChange={(event : any) => setSort(event.target.value)}
+          style={{ height: '25px', backgroundColor: themeColors.divBackground, color: themeColors.commentText }}
+        >
+          <MenuItem value="top">Top</MenuItem>
+          <MenuItem value="best">Best</MenuItem>
+          <MenuItem value="old">Old</MenuItem>
+          <MenuItem value="new">New</MenuItem>
+        </Select>
+      </Box>
+      <Button onClick={() => setShowFullEditor(!showFullEditor)}>
+        {showFullEditor ? 'Basic Editor' : 'Full Editor'}
+      </Button>
     </Box>
   );
   return (

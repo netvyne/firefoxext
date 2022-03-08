@@ -3,7 +3,6 @@ import ReplyIcon from '@mui/icons-material/Reply';
 import SendIcon from '@mui/icons-material/Send';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import MDEditor from '@uiw/react-md-editor';
 import React from 'react';
 import HCaptcha from '../common/hcaptcha';
@@ -18,43 +17,25 @@ interface Props {
     showCaptcha: any;
     captchaRef: any;
     setCaptchaToken: any;
-    themeColors: any;
+    showFullEditor: boolean;
   }
 
 const ReplyUI = ({
   postComment, setComment, comment, showForm, setShowForm, showCaptcha,
-  captchaRef, setCaptchaToken, themeColors
+  captchaRef, setCaptchaToken, showFullEditor
 }: Props) => {
-  const [showFullEditor, setShowFullEditor] = React.useState(false);
   const commentForm = (
     <form onSubmit={postComment}>
-      <Button onClick={() => setShowFullEditor(!showFullEditor)}>
-        {showFullEditor ? 'Basic Editor' : 'Full Editor'}
-      </Button>
-      {showFullEditor && (
-        <MDEditor
-          textareaProps={{
-            placeholder: 'Leave a reply...',
-          }}
-          height={100}
-          value={comment}
-          preview="edit"
-          style={{ backgroundColor: themeColors.divBackground }}
-          onChange={(value: string | undefined) => value !== undefined && setComment(value)}
-        />
-      )}
-      {!showFullEditor && (
-        <TextField
-          fullWidth
-          multiline
-          variant="outlined"
-          id="outlined-basic"
-          label="Leave a reply..."
-          placeholder="Leave a reply..."
-          onInput={(e: any) => setComment(e.target.value)}
-          value={comment}
-        />
-      )}
+      <MDEditor
+        textareaProps={{
+          placeholder: 'Leave a reply...',
+        }}
+        height={100}
+        value={comment}
+        preview="edit"
+        hideToolbar={!showFullEditor}
+        onChange={(value: string | undefined) => value !== undefined && setComment(value)}
+      />
       <Box my={1}>
         <Button
           type="submit"
