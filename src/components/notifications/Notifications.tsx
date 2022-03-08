@@ -1,8 +1,7 @@
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
-import NightlightOutlinedIcon from '@mui/icons-material/NightlightOutlined';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import React from 'react';
 import { useMutation, useQuery } from 'react-query';
 import NotificationBox from './NotificationBox';
@@ -20,6 +19,7 @@ interface GetUserNotifsQuery {
 const Notifications = ({
   refetch, mode, setMode, themeColors
 } : Props) => {
+// export const Notifications : FunctionComponent = ({ refetch }: Props) => {
   const [allNotifications, setAllNotifications] = React.useState<any>([]);
 
   const notificationsQuery = useQuery<GetUserNotifsQuery, string>(
@@ -41,7 +41,8 @@ const Notifications = ({
         data: mutateData,
       },
       {
-        onSuccess: () => {
+        onSuccess: (response : any) => {
+          console.log(response);
           refetch();
         },
       },
@@ -61,7 +62,7 @@ const Notifications = ({
   }
 
   function changeMode(extMode: string) {
-    localStorage.setItem('mode', extMode);
+    chrome.storage.local.set({ mode: extMode });
     setMode(extMode);
   }
 
@@ -75,46 +76,41 @@ const Notifications = ({
   }
   return (
     <Box m={2}>
-      {/* {!currentUser.CurrentUser && (
-        <Login setCurrentUser={setCurrentUser} themeColors={themeColors} />
-      )}
-
-      {currentUser.CurrentUser && (
-        <Button onClick={logout}>Logout</Button>
-      )} */}
-
-      <Box my={1}>
-        <Typography>Mode</Typography>
-        <Box width="100%" justifyContent="center" display="flex" flexDirection="row" alignItems="center" sx={{ border: 'solid 1px', borderRadius: '5px' }}>
-          <Box
-            width="50%"
-            justifyContent="center"
-            display="flex"
-            flexDirection="row"
-            alignItems="center"
-            sx={{ borderRight: 'solid 1px', padding: '10px', backgroundColor: (mode === 'light') ? 'gray' : 'transparent' }}
-            onClick={() => changeMode('light')}
-          >
-            <LightModeIcon />
-            <Typography>Light</Typography>
+      <Box sx={{
+        display: 'flex', justifyContent: 'center', width: '100%', alignItems: 'center'
+      }}
+      >
+        <Box sx={{
+          backgroundColor: 'gray',
+          height: '40px',
+          width: '200px',
+          borderRadius: '20px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: '10px',
+          cursor: 'pointer'
+        }}
+        >
+          {mode === 'light' && (
+          <Box onClick={() => { changeMode('dark'); console.log('clicked light'); }}>
+            Toggle Dark Mode
+            {/* <LightModeIcon /> */}
+            <DarkModeIcon sx={{ '&:hover': { color: 'white' } }} />
           </Box>
-          <Box
-            width="50%"
-            justifyContent="center"
-            display="flex"
-            flexDirection="row"
-            alignItems="center"
-            sx={{ padding: '10px', backgroundColor: (mode === 'dark') ? 'gray' : 'transparent' }}
-            onClick={() => changeMode('dark')}
-          >
-            <NightlightOutlinedIcon />
-            <Typography>Dark</Typography>
+          )}
+          {mode === 'dark' && (
+          <Box onClick={() => { changeMode('light'); console.log('clicked light'); }}>
+            Toggle Light Mode
+            {/* <LightModeIcon /> */}
+            <LightModeIcon sx={{ '&:hover': { color: 'yellow' } }} />
           </Box>
+          )}
         </Box>
       </Box>
 
       {allNotifications.length > 0 && (
-      <Box width="100%" justifyContent="center" display="flex" flexDirection="column" alignItems="center">
+      <Box width="100%" justifyContent="center" display="flex" flexDirection="column" alignItems="center" mt={1}>
         <Button
           type="button"
           variant="outlined"
@@ -134,7 +130,7 @@ const Notifications = ({
       <Box sx={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'flex-start'
+        alignItems: 'center'
       }}
       >
         <Button onClick={() => moreOptionClick('feedback', 'https://forms.gle/LUzvrWqhtWnKwAxX6')}>Feedback</Button>

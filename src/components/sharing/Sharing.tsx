@@ -17,7 +17,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import createTheme from '@mui/material/styles/createTheme';
-import ThemeProvider from '@mui/material/styles/ThemeProvider'; 
+import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import MDEditor from '@uiw/react-md-editor';
 import { sha256 } from 'js-sha256';
 import React, { useEffect } from 'react';
@@ -545,7 +545,6 @@ const Sharing = ({ defUser, url, themeColors } : Props) => {
                   placeholder: 'Lookit!',
                 }}
                 height={100}
-                style={{ backgroundColor: themeColors.divBackground }}
                 value={comment}
                 preview="edit"
                 onChange={(value: string | undefined) => value !== undefined && setComment(value)}
