@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Snackbar from '@mui/material/Snackbar';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import MDEditor from '@uiw/react-md-editor';
 import { AxiosError } from 'axios';
@@ -209,9 +210,9 @@ const ShoutTree = ({
           {/* @ts-ignore */}
 
           <Grid item container component={Box} m={1}>
-            <Grid item container component={Box} wrap="nowrap" spacing={1}>
-              <Grid item component={Box} onClick={toggleUserKarmaOpen}>
-                <Typography variant="body2" color={root.Author.UserName === user?.UserName ? 'primary' : 'textPrimary'}>
+            <Grid item container component={Box} wrap="nowrap" spacing={1} justifyContent="space-between">
+              <Grid item component={Box} onClick={toggleUserKarmaOpen} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body2" color={themeColors.commentText}>
                   {root.Author.UserName}
                 </Typography>
                 <UserKarma
@@ -220,11 +221,45 @@ const ShoutTree = ({
                   userName={root.Author.UserName}
                 />
               </Grid>
-              <Grid item component={Box}>
-                {DateTime.fromISO(root.CreatedAt?.toString(), {
-                  zone: 'utc',
-                }).toRelative()}
-              </Grid>
+              <Box display="flex">
+                <Grid item component={Box} sx={{ display: 'flex', alignItems: 'center' }}>
+                  {DateTime.fromISO(root.CreatedAt?.toString(), {
+                    zone: 'utc',
+                  }).toRelative()}
+                </Grid>
+                <Grid item component={Box} sx={{ display: 'flex', alignItems: 'center', marginLeft: '5px' }}>
+                  {(root.LatestModerationAt)
+                    ? (
+                      <Tooltip title={`Last Reviewed: ${DateTime.fromISO(root.LatestModerationAt.toString(), {
+                        zone: 'utc',
+                      }).toRelative()}`}
+                      >
+                        <div
+                          className="dot"
+                          style={{
+                            height: '5px',
+                            width: '5px',
+                            backgroundColor: '#80e5ff',
+                            borderRadius: '50%'
+                          }}
+                        />
+                      </Tooltip>
+                    )
+                    : (
+                      <Tooltip title="Pending Review">
+                        <div
+                          className="dot"
+                          style={{
+                            height: '5px',
+                            width: '5px',
+                            backgroundColor: '#bbb',
+                            borderRadius: '50%'
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                </Grid>
+              </Box>
             </Grid>
 
             <Grid item component={Box} className="text-area">
@@ -245,14 +280,15 @@ const ShoutTree = ({
                 defUser={defUser}
               />
               {!showForm && (
-              <Button size="small" onClick={() => setShowForm(!showForm)}>
-                <ReplyIcon />
+              <Button size="small" onClick={() => setShowForm(!showForm)} style={{ color: themeColors.linkColor }}>
+                <ReplyIcon style={{ color: themeColors.linkColor }} />
                 Reply
               </Button>
               )}
               <Button
                 disabled={clicked}
                 size="small"
+                sx={{ color: themeColors.linkColor }}
                 onClick={(e) => {
                   onSaveItem(e, !root.Saved);
                   setClicked(true);
@@ -261,10 +297,10 @@ const ShoutTree = ({
                 {root.Saved ? 'UNDO' : 'SAVE'}
               </Button>
               {user.UserName === root.Author.UserName
-                && <DeleteShout initShout={root} setRoot={setRoot} setShoutDeleted={setShoutDeleted} />}
+                && <DeleteShout initShout={root} setRoot={setRoot} setShoutDeleted={setShoutDeleted} themeColors={themeColors} />}
               {(user?.IsMod)
                     && (
-                      <Button href={`${process.env.REACT_APP_MOD_URL}/item/shout/${root.ID}`} target="_blank">
+                      <Button href={`${process.env.REACT_APP_MOD_URL}/item/shout/${root.ID}`} target="_blank" sx={{ color: themeColors.linkColor }}>
                         MOD
                         {' '}
                       </Button>

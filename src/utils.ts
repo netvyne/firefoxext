@@ -86,7 +86,8 @@ export function getThemeColors(theme: string) {
       toggleButtonHover: 'rgba(255, 255, 255, 0.08)',
       iconsButtonsColor: '#ffffff',
       iconsButtonsColorHover: '#bdbdbd',
-      divBackground: '#424242'
+      divBackground: '#424242',
+      linkColor: 'rgb(102, 178, 255)'
     },
     light: {
       commentParent: '#eceff1',
@@ -96,7 +97,8 @@ export function getThemeColors(theme: string) {
       toggleButtonHover: '#fafafa',
       iconsButtonsColor: '#000000',
       iconsButtonsColorHover: '#bdbdbd',
-      divBackground: '#eceff1'
+      divBackground: '#eceff1',
+      linkColor: '#1976d2'
     }
   };
   return themes[theme];
