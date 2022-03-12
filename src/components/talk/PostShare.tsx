@@ -11,9 +11,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import Snackbar from '@mui/material/Snackbar';
-import Tooltip from '@mui/material/Tooltip';
 import createTheme from '@mui/material/styles/createTheme';
-import ThemeProvider from '@mui/material/styles/ThemeProvider'; 
+import ThemeProvider from '@mui/material/styles/ThemeProvider';
+import Tooltip from '@mui/material/Tooltip';
 import { DateTime } from 'luxon';
 import React from 'react';
 import { useMutation, useQuery } from 'react-query';
@@ -126,9 +126,9 @@ export default function PostShare({
         container
         component={Box}
         boxShadow={3}
-        direction="column"
         p={1}
-        borderRadius="borderRadius"
+        direction="column"
+        borderRadius="5px"
         wrap="nowrap"
       >
         <Grid container direction="row" alignItems="flex-start" spacing={2}>
@@ -159,8 +159,10 @@ export default function PostShare({
           )}
         </Grid>
 
-        <Grid container component={Box} sx={{ backgroundColor: themeColors.commentParent }}>
-          <FeedItem initWebsite={post.Website} initPost={post} defUser={defUser} themeColors={themeColors} />
+        <Grid container component={Box} sx={{ border: `solid 1px ${themeColors.commentParent}`, borderRadius: '5px' }}>
+          {post.WebsiteShare?.Website && (
+            <FeedItem initWebsite={post.WebsiteShare.Website} initPost={post} defUser={defUser} themeColors={themeColors} />
+          )}
         </Grid>
         <Grid item component={Box}>
           <Box component="span">
