@@ -41,7 +41,7 @@ module.exports = {
       chunks: 'all',
       maxInitialRequests: Infinity,
       minSize: 0,
-      maxSize: 240000,
+      maxSize: 200000,
       cacheGroups: {
         vendor: {
           test: /[\\/]node_modules[\\/]/,
