@@ -266,12 +266,12 @@ export const Popup: FunctionComponent = () => {
                     aria-label="icon label tabs example"
                     TabIndicatorProps={{
                       style: {
-                        backgroundColor: '#9F00CF',
+                        backgroundColor: themeColors.commentText,
                       },
                     }}
                   >
-                    <Tab icon={<PublicIcon sx={{ color: value === 0 ? '#9F00CF' : 'default' }} />} label="Public" {...a11yProps(0)} />
-                    <Tab icon={<HomeIcon sx={{ color: value === 1 ? '#9F00CF' : 'default' }} />} label="Private" {...a11yProps(1)} />
+                    <Tab icon={<PublicIcon sx={{ color: value === 0 ? themeColors.commentText : 'default' }} />} label="Public" {...a11yProps(0)} />
+                    <Tab icon={<HomeIcon sx={{ color: value === 1 ? themeColors.commentText : 'default' }} />} label="Private" {...a11yProps(1)} />
                     <Tab
                       icon={(
                         <Badge
