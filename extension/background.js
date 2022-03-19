@@ -131,6 +131,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
+  chrome.storage.sync.remove('isExtClosed', () => {});
   chrome.tabs.create({
     url: 'https://www.netvyne.com/welcome',
     active: true
