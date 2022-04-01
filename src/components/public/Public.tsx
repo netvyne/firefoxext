@@ -4,7 +4,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import createTheme from '@mui/material/styles/createTheme';
 import styled from '@mui/material/styles/styled';
-import ThemeProvider from '@mui/material/styles/ThemeProvider'; 
+import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import { sha256 } from 'js-sha256';
 import React from 'react';
 import { useQuery } from 'react-query';
@@ -12,7 +12,6 @@ import {
   Shout, User, Website
 } from '../../../types/common/types';
 import ActionContainer from './ActionContainer';
-import Chat from './Chat';
 import Discussion from './Discussion';
 import WebsitePlaceholder from './WebsitePlaceholder';
 import WebsiteUI from './WebsiteUI';
@@ -117,27 +116,17 @@ const Public = ({
               {data?.Website.ShoutCount}
               )
             </ToggleButton>
-            <ToggleButton value="chat" aria-label="chat" sx={{ '&:hover': { backgroundColor: themeColors.toggleButtonHover } }}>
-              Live Chat
-              (
-              {data?.Website.LiveCount}
-              )
-            </ToggleButton>
           </ToggleButtonGroup>
         </Box>
         <Box>
-          {mode === 'discussion'
-            ? (
-              <Discussion
-                initCurrentUser={initCurrentUser}
-                initURL={url}
-                sort={sort}
-                setSort={setSort}
-                isTabUpdated={isTabUpdated}
-                themeColors={themeColors}
-              />
-            )
-            : <Chat initURL={url} themeColors={themeColors} />}
+          <Discussion
+            initCurrentUser={initCurrentUser}
+            initURL={url}
+            sort={sort}
+            setSort={setSort}
+            isTabUpdated={isTabUpdated}
+            themeColors={themeColors}
+          />
         </Box>
       </ThemeProvider>
     </Root>
