@@ -1,10 +1,6 @@
 /* eslint-disable max-len */
 import Box from '@mui/material/Box';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import createTheme from '@mui/material/styles/createTheme';
-import styled from '@mui/material/styles/styled';
-import ThemeProvider from '@mui/material/styles/ThemeProvider';
+import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
 import { sha256 } from 'js-sha256';
 import React from 'react';
 import { useQuery } from 'react-query';
@@ -63,11 +59,7 @@ const Public = ({
   initCurrentUser, isTabActive, url, isTabUpdated, themeColors
 } : Props) => {
   const user : any = initCurrentUser;
-  const [mode, setMode] = React.useState('discussion');
   const [sort, setSort] = React.useState('best');
-  const handleMode = (event : any, newMode : string) => {
-    setMode(newMode);
-  };
 
   const urlHash = sha256(`${url?.host}${url?.pathname}${url?.search}`);
   const route = `/get_shout_trees?url_hash=${urlHash}&sort=${sort}`;
@@ -88,7 +80,7 @@ const Public = ({
     );
     actionBox = (
       <>
-        <ActionContainer initWebsite={data!.Website} url={url} refetch={refetch} />
+        <ActionContainer initWebsite={data!.Website} url={url} refetch={refetch} themeColors={themeColors} />
       </>
     );
   }
@@ -101,23 +93,6 @@ const Public = ({
       <ThemeProvider theme={discussionTheme}>
         {website}
         {actionBox}
-        <Box height="25px">
-          <ToggleButtonGroup
-            size="small"
-            value={mode}
-            exclusive
-            onChange={handleMode}
-            aria-label="public mode"
-            fullWidth
-            sx={{ height: '25px', backgroundColor: themeColors.toggleButton }}
-          >
-            <ToggleButton value="discussion" aria-label="discussion" sx={{ '&:hover': { backgroundColor: themeColors.toggleButtonHover } }}>
-              Discussion (
-              {data?.Website.ShoutCount}
-              )
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Box>
         <Box>
           <Discussion
             initCurrentUser={initCurrentUser}

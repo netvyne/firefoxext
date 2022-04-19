@@ -3,6 +3,7 @@ import ReplyIcon from '@mui/icons-material/Reply';
 import SendIcon from '@mui/icons-material/Send';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+// import TextField from '@mui/material/TextField';
 import MDEditor from '@uiw/react-md-editor';
 import React from 'react';
 import HCaptcha from '../common/hcaptcha';
@@ -17,23 +18,27 @@ interface Props {
     showCaptcha: any;
     captchaRef: any;
     setCaptchaToken: any;
-    showFullEditor: boolean;
+    themeColors: any;
+    // showFullEditor: boolean;
   }
 
 const ReplyUI = ({
   postComment, setComment, comment, showForm, setShowForm, showCaptcha,
-  captchaRef, setCaptchaToken, showFullEditor
+  captchaRef, setCaptchaToken, themeColors
 }: Props) => {
   const commentForm = (
     <form onSubmit={postComment}>
       <MDEditor
         textareaProps={{
-          placeholder: 'Leave a reply...',
+          placeholder: 'Leave a comment...',
+          style: {
+            color: themeColors.commentText
+          }
         }}
-        height={100}
+        height={120}
         value={comment}
         preview="edit"
-        hideToolbar={!showFullEditor}
+        hideToolbar
         onChange={(value: string | undefined) => value !== undefined && setComment(value)}
       />
       <Box my={1}>
@@ -51,7 +56,7 @@ const ReplyUI = ({
         </Button>
         {showCaptcha
         && (
-          <div style={{ position: 'absolute' }}>
+          <div style={{ position: 'absolute', zIndex: 999 }}>
             <HCaptcha
               sitekey={process.env.REACT_APP_CAPTCHA_SITE_KEY || ''}
               onVerify={(token) => setCaptchaToken(token)}
