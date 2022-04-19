@@ -1,12 +1,11 @@
 /* eslint-disable max-len */
 import Box from '@mui/material/Box';
 import MenuItem from '@mui/material/MenuItem';
-import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
-import Typography from '@mui/material/Typography';
 import createTheme from '@mui/material/styles/createTheme';
 import styled from '@mui/material/styles/styled';
 import ThemeProvider from '@mui/material/styles/ThemeProvider';
+import Typography from '@mui/material/Typography';
 import { AxiosError } from 'axios';
 import { sha256 } from 'js-sha256';
 import React from 'react';
@@ -91,8 +90,7 @@ const Discussion = ({
   const captchaRef = React.createRef<HCaptcha>();
   const [comment, setComment] = React.useState('');
   const [noShout, setNoShout] = React.useState('');
-  const treeHeight = window.innerHeight - 392;
-  const [showFullEditor, setShowFullEditor] = React.useState(false);
+  const treeHeight = window.innerHeight - 332;
 
   const urlHash = sha256(`${initURL?.host}${initURL?.pathname}${initURL?.search}`);
   const route = `/get_shout_trees?url_hash=${urlHash}&sort=${sort}`;
@@ -104,7 +102,7 @@ const Discussion = ({
           setNoShout('');
           setChildren(shoutData.Roots);
         } else {
-          setNoShout('Be the first to leave a shout');
+          setNoShout('Be the first to leave a comment');
         }
       }
     }
@@ -113,11 +111,11 @@ const Discussion = ({
   const replyMutation = useMutation<SuccessResponse, AxiosError>(
     {
       onSuccess: (mutationData) => {
-        setNoShout('');
         setComment('');
         setShowCaptcha(false);
         setCaptchaToken('');
         setChildren((c) => ((c && c.length > 0) ? [mutationData.Shout, ...c] : [mutationData.Shout]));
+        // refetch();
       },
       onError: (err: AxiosError) => {
         if (err.response?.status === 402) {
@@ -139,7 +137,11 @@ const Discussion = ({
       CaptchaToken: captchaToken
     };
     // @ts-ignore
-    const res = replyMutation.mutate({ route: '/post_shout', data: postShoutData });
+    const res = replyMutation.mutate({ route: '/post_shout', data: postShoutData }, {
+      onSuccess: () => {
+        setNoShout('');
+      }
+    });
     return res;
   };
   let trees : any = '';
@@ -169,20 +171,18 @@ const Discussion = ({
         showCaptcha={showCaptcha}
         captchaRef={captchaRef}
         setCaptchaToken={setCaptchaToken}
-        showFullEditor={showFullEditor}
+        themeColors={themeColors}
       />
     );
   }
   const sorter = (
     <Box
-      p={1}
+      py={1}
       height="40px"
       display="flex"
       justifyContent="space-between"
     >
       <Box>
-        Sort:
-        {' '}
         <Select
           size="small"
           value={sort}
@@ -196,18 +196,15 @@ const Discussion = ({
           <MenuItem value="new">New</MenuItem>
         </Select>
       </Box>
-      <Button onClick={() => setShowFullEditor(!showFullEditor)}>
-        {showFullEditor ? 'Basic Editor' : 'Full Editor'}
-      </Button>
     </Box>
   );
   return (
     <Root>
       <ThemeProvider theme={discussionTheme}>
-        {sorter}
-        <Box height="150px">
+        <Box height="130px">
           {reply}
         </Box>
+        {sorter}
         <Box style={{
           height: `${treeHeight}px`,
           overflow: 'auto',
