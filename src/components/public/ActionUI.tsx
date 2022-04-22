@@ -22,7 +22,7 @@ const ActionUI = ({
       <Grid container wrap="nowrap" justifyContent="center" style={{ alignItems: 'center' }}>
         <Grid item component={IconButton} value="1" onClick={postVote} sx={{ display: 'flex', flexDirection: 'column' }}>
           <ThumbUpIcon
-            style={{ color: website.VoteStatus === 1 ? 'green' : 'grey' }}
+            style={{ color: website.Vote.Status === 1 ? 'green' : 'grey' }}
           />
           <Typography style={{ color: themeColors.commentText }}>
             {(website?.Upvotes) ? website.Upvotes : 0}
@@ -30,7 +30,7 @@ const ActionUI = ({
         </Grid>
         <Grid item component={IconButton} value="-1" onClick={postVote} sx={{ display: 'flex', flexDirection: 'column' }}>
           <ThumbDownIcon
-            style={{ color: website.VoteStatus === -1 ? 'red' : 'grey' }}
+            style={{ color: website.Vote.Status === -1 ? 'red' : 'grey' }}
           />
           <Typography style={{ color: themeColors.commentText }}>
             {(website?.Downvotes) ? website.Downvotes : 0}

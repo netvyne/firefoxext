@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Netvyne Extension",
   "description": "Comment, share, and discuss your favorite websites.",
-  "version": "1.0.1",
+  "version": "1.0.9",
   "content_scripts": [
     {
       "run_at": "document_end",
@@ -26,7 +26,6 @@
   "web_accessible_resources": [
     "popup.html"
   ],
-  "browser_action": {},
   "options_ui": {
     "page": "options.html",
     "open_in_tab": false
@@ -37,16 +36,17 @@
     ],
     "persistent": true
   },
+  "browser_action": {},
   "icons": {
     "16": "icon-16.png",
     "48": "icon-48.png",
     "128": "icon-128.png"
   },
   "permissions": [
-    "cookies",
     "storage",
+    "<all_urls>",
     "activeTab",
-    "tabs",
-    "<all_urls>"
+    "cookies",
+    "tabs"
   ]
 }

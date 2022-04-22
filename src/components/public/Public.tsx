@@ -18,6 +18,7 @@ interface Props {
   url: any;
   isTabUpdated: boolean;
   themeColors: any;
+  autoFetch: boolean;
 }
 
 interface GetShoutTreesQuery {
@@ -56,7 +57,8 @@ const discussionTheme = createTheme({
   }
 });
 const Public = ({
-  initCurrentUser, isTabActive, url, isTabUpdated, themeColors
+  initCurrentUser, isTabActive, url, isTabUpdated, themeColors,
+  autoFetch
 } : Props) => {
   const user : any = initCurrentUser;
   const [sort, setSort] = React.useState('best');
@@ -65,7 +67,7 @@ const Public = ({
   const route = `/get_shout_trees?url_hash=${urlHash}&sort=${sort}`;
   const { data, status, refetch } = useQuery<GetShoutTreesQuery, string>(
     route, {
-      enabled: isTabActive && isTabUpdated
+      enabled: isTabActive && isTabUpdated && autoFetch
     }
   );
 
@@ -101,6 +103,7 @@ const Public = ({
             setSort={setSort}
             isTabUpdated={isTabUpdated}
             themeColors={themeColors}
+            autoFetch={autoFetch}
           />
         </Box>
       </ThemeProvider>

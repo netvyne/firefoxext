@@ -1,12 +1,12 @@
 chrome.browserAction.onClicked.addListener((tab) => {
   chrome.tabs.sendMessage(tab.id, 'toggle');
-  browser.tabs.query({currentWindow: true, active: true}).then((tabs) => {
-      let tab = tabs[0]; // Safe to assume there will only be one result
-      chrome.tabs.sendMessage(tab.id, {
-        message: 'currentTabInfo',
-        urlInfo: tab
-      });
-  }, console.error)
+  chrome.tabs.query({ currentWindow: true, active: true }).then((tabs) => {
+    const curTab = tabs[0]; // Safe to assume there will only be one result
+    chrome.tabs.sendMessage(curTab.id, {
+      message: 'currentTabInfo',
+      urlInfo: curTab
+    });
+  }, console.error);
 });
 
 chrome.runtime.onMessage.addListener(
@@ -25,6 +25,17 @@ chrome.runtime.onMessage.addListener(
         chrome.tabs.sendMessage(activeTab.id, 'toggle');
       });
       sendResponse({ message: 'goodbye cropped' });
+    }
+
+    if (request.popupMounted) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const activeTab = tabs[0];
+        chrome.tabs.sendMessage(activeTab.id, {
+          message: 'currentTabInfo',
+          urlInfo: activeTab,
+          active: activeTab?.active
+        });
+      });
     }
   },
 );
@@ -50,7 +61,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         { message: 'clicked_browser_action' },
         () => {
           chrome.tabs.captureVisibleTab({ format: 'png' }, (src) => {
-            storage.StorageArea.set({ screenshot: src }, () => {
+            chrome.storage.local.set({ screenshot: src }, () => {
               chrome.tabs.sendMessage(activeTab.id, 'toggle');
               chrome.tabs.sendMessage(
                 activeTab.id,
@@ -66,7 +77,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
   } else if (request.screenshot === 'clear') {
     // clear screenshot from storage
-    storage.StorageArea.remove('screenshot', () => {
+    chrome.storage.local.remove('screenshot', () => {
       sendResponse([]);
     });
   } else if (request.screenshot === 'createDiv') {
@@ -79,7 +90,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         { message: 'clicked_browser_action' },
         () => {
           chrome.tabs.captureVisibleTab({ format: 'png' }, (src) => {
-            storage.StorageArea.set({ screenshot: src }, () => {
+            chrome.storage.local.set({ screenshot: src }, () => {
               // console.log('Stored screenshot!');
               chrome.tabs.sendMessage(activeTab.id, 'toggle');
               chrome.scripting.executeScript(
@@ -103,7 +114,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.browserAction.setBadgeBackgroundColor({ color: [0, 0, 0, 0] });
     chrome.browserAction.setBadgeText({ text: '' });
   } else if (request.type && request.type === 'setBadge') {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, () => {
       chrome.browserAction.setBadgeText({ text: `${request.text}` });
     });
   } else {
@@ -131,7 +142,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.sync.remove('isExtClosed', () => {});
+  chrome.storage.local.remove('isExtClosed', () => {});
   chrome.tabs.create({
     url: 'https://www.netvyne.com/welcome',
     active: true
@@ -145,10 +156,23 @@ chrome.tabs.onUpdated.addListener(
   (tabId, changeInfo) => {
     // read changeInfo data and do something with it
     if (changeInfo.url) {
-      chrome.tabs.sendMessage(tabId, {
-        message: 'urlupdated',
-        url: changeInfo.url
-      });
+      setTimeout(() => {
+        chrome.tabs.get(tabId, async (tab) => {
+          chrome.tabs.sendMessage(tabId, {
+            message: 'urlupdated',
+            completeInfo: tab,
+            url: changeInfo.url
+          });
+        });
+      }, 2000);
+
+      // chrome.tabs.getCurrent((tab) => {
+      //   chrome.tabs.sendMessage(tabId, {
+      //     message: 'urlupdated',
+      //     completeInfo: tab,
+      //     url: changeInfo.url
+      //   });
+      // });
     }
   }
 );
