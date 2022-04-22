@@ -105,10 +105,10 @@ export const Popup: FunctionComponent = () => {
     });
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg === 'toggle') {
-        chrome.storage.local.get('isExtClosed', (result) => {
-          if (result.isExtClosed === true) {
-            chrome.storage.sync.get(
-              'netvyneBadge',
+        chrome.storage.local.get({ isExtClosed: true }, (result) => {
+          if (result.isExtClosed === true || result.isExtClosed === null) {
+            chrome.storage.local.get(
+              { netvyneBadge: true },
               (items) => {
                 if (items.netvyneBadge === true || items.netvyneBadge === null) {
                   setIsTabUpdated(true);
@@ -130,10 +130,10 @@ export const Popup: FunctionComponent = () => {
     });
     browser.runtime.sendMessage({ popupMounted: true });
 
-    chrome.storage.local.get('isExtClosed', (result) => {
-      if (result.isExtClosed === true) {
-        chrome.storage.sync.get(
-          'netvyneBadge',
+    chrome.storage.local.get({ isExtClosed: true }, (result) => {
+      if (result.isExtClosed === true || result.isExtClosed === null) {
+        chrome.storage.local.get(
+          { netvyneBadge: true },
           (items) => {
             if (items.netvyneBadge === true || items.netvyneBadge === null) {
               setAutoFetch(true);
@@ -167,40 +167,32 @@ export const Popup: FunctionComponent = () => {
     },
   });
 
-  React.useEffect(() => {
-    if (chrome.tabs) {
-      chrome.tabs.getCurrent((tab) => {
-        setIsTabActive(tab?.active);
-      });
-    }
-  }, []);
-
   const queryInfo = { active: true, lastFocusedWindow: true };
 
   useEffect(() => {
     chrome.runtime.onMessage.addListener(
       (request) => {
-        // listen for messages sent from background.js
         if (request.message === 'urlupdated') {
           setIsTabUpdated(true);
-          setTimeout(() => {
-            const newUrl : any = isValidURL(request.completeInfo.url);
-            let formatedUrl = {
-              pathname: newUrl.pathname,
-              host: newUrl.host,
-              search: newUrl.search,
-              Title: request.completeInfo.title,
-              origin: newUrl.origin,
-            };
-            formatedUrl = cleanUrl(formatedUrl, urlDomainMap, urlQueryParamFilter);
-            setUrl(formatedUrl);
-            if (autoFetch) {
-              refetch();
-            }
-          }, 2000);
+          const newUrl : any = isValidURL(request.completeInfo.url);
+          let formatedUrl = {
+            pathname: newUrl.pathname,
+            host: newUrl.host,
+            search: newUrl.search,
+            Title: request.completeInfo.title,
+            origin: newUrl.origin,
+          };
+          formatedUrl = cleanUrl(formatedUrl, urlDomainMap, urlQueryParamFilter);
+          setUrl(formatedUrl);
+          if (autoFetch) {
+            refetch();
+          }
         }
 
         if (request.message === 'currentTabInfo') {
+          if (request.active) {
+            setIsTabActive(request.active);
+          }
           const newUrl : any = isValidURL(request.urlInfo.url);
           const formatedUrl = {
             pathname: newUrl.pathname,
@@ -217,6 +209,12 @@ export const Popup: FunctionComponent = () => {
       }
     );
   }, []);
+
+  useEffect(() => {
+    if (!autoFetch) {
+      setBadge('');
+    }
+  }, [autoFetch]);
 
   useEffect(() => {
     if (chrome.tabs) {
@@ -310,7 +308,7 @@ export const Popup: FunctionComponent = () => {
               </AppBar>
               <Box sx={{ marginTop: '60px', padding: '8px', paddingTop: '0px' }}>
                 <TabPanel value={value} index={0}>
-                  <Public initCurrentUser={user} isTabActive={isTabActive} url={url} isTabUpdated={isTabUpdated} themeColors={themeColors} />
+                  <Public initCurrentUser={user} isTabActive={isTabActive} url={url} isTabUpdated={isTabUpdated} themeColors={themeColors} autoFetch={autoFetch} />
                 </TabPanel>
                 <TabPanel style={{ paddingTop: '8px' }} value={value} index={1}>
                   <Sharing defUser={user} url={url} themeColors={themeColors} />

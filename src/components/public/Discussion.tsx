@@ -26,6 +26,7 @@ interface Props {
   setSort: any;
   isTabUpdated: boolean;
   themeColors: any;
+  autoFetch: boolean;
 }
 
 interface GetShoutTreesQuery {
@@ -79,7 +80,8 @@ const discussionTheme = createTheme({
   }
 });
 const Discussion = ({
-  initCurrentUser, initURL, sort, setSort, isTabUpdated, themeColors
+  initCurrentUser, initURL, sort, setSort, isTabUpdated, themeColors,
+  autoFetch
 } : Props) => {
   // eslint-disable-next-line global-require
   const user : any = initCurrentUser;
@@ -89,21 +91,15 @@ const Discussion = ({
   const [children, setChildren] = React.useState<Shout[]>([]);
   const captchaRef = React.createRef<HCaptcha>();
   const [comment, setComment] = React.useState('');
-  const [noShout, setNoShout] = React.useState('');
   const treeHeight = window.innerHeight - 332;
 
   const urlHash = sha256(`${initURL?.host}${initURL?.pathname}${initURL?.search}`);
   const route = `/get_shout_trees?url_hash=${urlHash}&sort=${sort}`;
   const { data, status } = useQuery<GetShoutTreesQuery, string>(
     route, {
-      enabled: isTabUpdated,
+      enabled: isTabUpdated && autoFetch,
       onSuccess: (shoutData) => {
-        if (shoutData.Roots.length > 0) {
-          setNoShout('');
-          setChildren(shoutData.Roots);
-        } else {
-          setNoShout('Be the first to leave a comment');
-        }
+        setChildren(shoutData.Roots);
       }
     }
   );
@@ -125,6 +121,9 @@ const Discussion = ({
     }
   );
 
+  let trees : any = '';
+  let reply: any = '';
+
   const postComment = async (event : any) => {
     event.preventDefault();
     const postShoutData = {
@@ -137,15 +136,9 @@ const Discussion = ({
       CaptchaToken: captchaToken
     };
     // @ts-ignore
-    const res = replyMutation.mutate({ route: '/post_shout', data: postShoutData }, {
-      onSuccess: () => {
-        setNoShout('');
-      }
-    });
+    const res = replyMutation.mutate({ route: '/post_shout', data: postShoutData });
     return res;
   };
-  let trees : any = '';
-  let reply: any = '';
 
   if (status === 'loading') {
     trees = <Box sx={{ marginLeft: '8px' }}><ShoutPlaceholder /></Box>;
@@ -211,10 +204,11 @@ const Discussion = ({
           marginLeft: '-8px'
         }}
         >
-          {noShout !== '' && (
-            <Typography sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>{noShout}</Typography>
+          {children.length === 0 && (
+            <Typography sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>Be the first to leave a commentt</Typography>
           )}
           {trees}
+
         </Box>
       </ThemeProvider>
     </Root>

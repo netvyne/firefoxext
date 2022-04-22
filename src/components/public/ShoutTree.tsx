@@ -127,6 +127,7 @@ const ShoutTree = ({
           sx={{
             color: themeColors.linkColor
           }}
+          disabled={comment.trim().length === 0}
         >
           {' '}
           Submit

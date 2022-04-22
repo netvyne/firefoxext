@@ -6,17 +6,19 @@ iframe.style.position = 'fixed';
 iframe.style.top = '0px';
 iframe.style.right = '0px';
 iframe.style.zIndex = '9000000000000000000';
-iframe.frameBorder = 'none';
 iframe.src = chrome.runtime.getURL('./js/popup.html');
+chrome.storage.local.set({ isExtClosed: true });
 
 document.body.appendChild(iframe);
 function toggle() {
   if (iframe.style.width === '0px') {
-    chrome.storage.local.set({ isExtClosed: false });
-    iframe.style.width = '450px';
+    chrome.storage.local.set({ isExtClosed: false }, () => {
+      iframe.style.width = '450px';
+    });
   } else {
-    chrome.storage.local.set({ isExtClosed: true });
-    iframe.style.width = '0px';
+    chrome.storage.local.set({ isExtClosed: true }, () => {
+      iframe.style.width = '0px';
+    });
   }
 }
 
