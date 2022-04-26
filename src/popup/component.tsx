@@ -74,7 +74,6 @@ export const Popup: FunctionComponent = () => {
   const [user, setUser] = React.useState<User|any>();
   const [url, setUrl] = useState<any>({});
   const [isTabActive, setIsTabActive] = useState<any>(false);
-  const [isExtClosed, setIsExtClosed] = useState<any>(true);
   const [isTabUpdated, setIsTabUpdated] = useState(false);
   const [mode, setMode] = useState<any>('light');
   const [themeColors, setThemeColors] = React.useState<any>('');
@@ -120,7 +119,6 @@ export const Popup: FunctionComponent = () => {
               }
             );
           } else {
-            setIsExtClosed(false);
             setIsTabUpdated(true);
             setAutoFetch(true);
             setIsTabActive(true);
@@ -153,7 +151,17 @@ export const Popup: FunctionComponent = () => {
 
   const route = `/get_user_notifications?url_hash=${urlHash}`;
 
-  const { data, refetch } = useQuery<any, string>(route, { enabled: (isTabActive && autoFetch && !!user), refetchInterval: intervalMs });
+  const { data, refetch } = useQuery<any, string>(route, {
+    enabled: (isTabActive && autoFetch && !!user),
+    refetchInterval: intervalMs,
+    onSuccess: (notificationResponse: any) => {
+      if (notificationResponse.WebsiteShoutCount > 0) {
+        setBadge(notificationResponse.WebsiteShoutCount);
+      } else {
+        setBadge('');
+      }
+    }
+  });
 
   const loginRoute = '/login';
 
@@ -231,14 +239,7 @@ export const Popup: FunctionComponent = () => {
         setUrl(formatedUrl);
       });
     }
-    if (data) {
-      if (data.WebsiteShoutCount > 0) {
-        setBadge(data.WebsiteShoutCount);
-      } else {
-        setBadge('');
-      }
-    }
-  }, [data]);
+  }, []);
 
   const [value, setValue] = React.useState(0);
   const handleChange = (event : any, newValue : any) => {
@@ -281,11 +282,11 @@ export const Popup: FunctionComponent = () => {
                           variant="dot"
                           invisible={!data?.ContainsUnread}
                         >
-                          {user?.AvatarPath ? (
+                          {user?.AvatarPath && autoFetch ? (
                             <Avatar
                               style={{ width: 24, height: 24 }}
                               alt="Avatar"
-                              src={!isExtClosed ? formatImageURL(user.AvatarPath) : ''}
+                              src={formatImageURL(user.AvatarPath)}
                             />
                           )
                             : (
