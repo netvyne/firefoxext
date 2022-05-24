@@ -13,7 +13,7 @@ import WebsitePlaceholder from './WebsitePlaceholder';
 import WebsiteUI from './WebsiteUI';
 
 interface Props {
-  initCurrentUser: User[];
+  initCurrentUser: User;
   isTabActive: boolean;
   url: any;
   isTabUpdated: boolean;
@@ -60,7 +60,7 @@ const Public = ({
   initCurrentUser, isTabActive, url, isTabUpdated, themeColors,
   autoFetch
 } : Props) => {
-  const user : any = initCurrentUser;
+  // const user : any = initCurrentUser;
   const [sort, setSort] = React.useState('best');
 
   const urlHash = sha256(`${url?.host}${url?.pathname}${url?.search}`);
@@ -74,7 +74,7 @@ const Public = ({
   let website : any = '';
   let actionBox;
 
-  if (status === 'success' && user) {
+  if (status === 'success' && initCurrentUser) {
     website = (
       <>
         <WebsiteUI initWebsite={data!.Website} url={url} />
