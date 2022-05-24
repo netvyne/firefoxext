@@ -20,7 +20,7 @@ import ShoutTree from './ShoutTree';
 import './styles.scss';
 
 interface Props {
-  initCurrentUser: User[];
+  initCurrentUser: User;
   initURL: any;
   sort: string;
   setSort: any;
@@ -84,7 +84,7 @@ const Discussion = ({
   autoFetch
 } : Props) => {
   // eslint-disable-next-line global-require
-  const user : any = initCurrentUser;
+  // const user : any = initCurrentUser;
   const [showForm, setShowForm] = React.useState(true);
   const [showCaptcha, setShowCaptcha] = React.useState(false);
   const [captchaToken, setCaptchaToken] = React.useState('');
@@ -142,14 +142,14 @@ const Discussion = ({
 
   if (status === 'loading') {
     trees = <Box sx={{ marginLeft: '8px' }}><ShoutPlaceholder /></Box>;
-  } else if (status === 'success' && user) {
+  } else if (status === 'success' && initCurrentUser) {
     if (children) {
       trees = children.map((treeRoot) => (
         <ShoutTree
           key={treeRoot.ID}
           website={data!.Website}
           treeRoot={treeRoot}
-          defUser={user}
+          defUser={initCurrentUser}
           themeColors={themeColors}
         />
       ));
