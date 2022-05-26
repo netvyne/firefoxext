@@ -55,5 +55,10 @@ If you encounter any issues with the extension, or if there's something you'd li
 
 Also, if you'd like to contribute code, you're more than welcome to do so! Please make an issue first so that we can discuss and be on the same page.
 
+Note: If you wish to reduce the permissions needed at the cost of eliminating the comment count badge, you should be able to do so by updating the following files:
+
+- `manifest.json` -> remove "tabs" permission
+- `component.tsx` -> remove references to "chrome.tabs" (use activeTab instead)
+
 ---
 &copy; 2021-2022 Netvyne, Inc.
